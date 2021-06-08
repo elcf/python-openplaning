@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import interpolate, signal
 from scipy.special import gamma
-import ndmath #import finiteGrad, complexGrad, nDimNewton
+import ndmath
 import warnings
 
 class PlaningBoat():
