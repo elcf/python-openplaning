@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import interpolate, signal
 from scipy.special import gamma
-from ndmath import finiteGrad, complexGrad, nDimNewton
+import ndmath #import finiteGrad, complexGrad, nDimNewton
 import warnings
 
 class PlaningBoat():
@@ -644,7 +644,7 @@ class PlaningBoat():
             return self.net_force[1:3]
 
         def _boatForcesPrime(x):
-            return complexGrad(_boatForces, x)
+            return ndmath.complexGrad(_boatForces, x)
 
         def _L_K(x):
             self.z_wl = x[0]
@@ -654,7 +654,7 @@ class PlaningBoat():
         
         xlims = np.array([[-np.Inf, np.Inf], tauLims])
         warnings.filterwarnings("ignore", category=UserWarning)
-        _ = nDimNewton(_boatForces, x0, _boatForcesPrime, tolF, maxiter, xlims, hehcon=_L_K)
+        _ = ndmath.nDimNewton(_boatForces, x0, _boatForcesPrime, tolF, maxiter, xlims, hehcon=_L_K)
         warnings.filterwarnings("default", category=UserWarning)
         
     def get_eom_matrices(self, runGeoLengths=True):
@@ -789,9 +789,9 @@ class PlaningBoat():
             temp_eta_5 = self.eta_5
             
             if diffType == 1:
-                C_full = -complexGrad(func, [temp_eta_3, temp_eta_5])
+                C_full = -ndmath.complexGrad(func, [temp_eta_3, temp_eta_5])
             elif diffType == 2:
-                C_full = -finiteGrad(func, [temp_eta_3, temp_eta_5], 10**-6.6)
+                C_full = -ndmath.finiteGrad(func, [temp_eta_3, temp_eta_5], 10**-6.6)
 
             #Reset values
             self.eta_3 = temp_eta_3
