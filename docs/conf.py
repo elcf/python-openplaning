@@ -41,6 +41,10 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+# Napoleon settings
+napoleon_numpy_docstring = False
+napoleon_include_init_with_doc = True
+
 
 # -- Options for HTML output -------------------------------------------------
 
