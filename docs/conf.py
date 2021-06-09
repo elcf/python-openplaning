@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../src/'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'openplaning'
+project = 'OpenPlaning'
 copyright = '2021, Esteban L. Castro-Feliciano'
 author = 'Esteban L. Castro-Feliciano'
 
@@ -31,7 +31,7 @@ release = '0.0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 import sphinx_rtd_theme
-extensions = ['sphinx.ext.autodoc', 'sphinx_rtd_theme', 'sphinx.ext.napoleon']
+extensions = ['sphinx.ext.autodoc', 'sphinx_rtd_theme', 'sphinx.ext.napoleon', 'myst_parser']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -40,10 +40,6 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
-# Napoleon settings
-napoleon_numpy_docstring = False
-napoleon_include_init_with_doc = True
 
 
 # -- Options for HTML output -------------------------------------------------
