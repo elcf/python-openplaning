@@ -56,6 +56,7 @@ output/*/index.html
 
 # Sphinx
 docs/_build
+docs/README.md
 
 .DS_Store
 *~
