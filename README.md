@@ -1,5 +1,7 @@
 # OpenPlaning
 
+[![Documentation Status](https://readthedocs.org/projects/openplaning/badge/?version=latest)](https://openplaning.readthedocs.io/en/latest/?badge=latest)
+
 OpenPlaning is a Python library for the hydrodynamic evaluation of planing hulls based on the Savitsky empirical methods.
 
 ## Installation
@@ -11,6 +13,9 @@ pip install openplaning
 ```
 
 ## Examples
+
+You can run the example below online with Binder:
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/elcf/binder-openplaning/main?filepath=OpenPlaningExamples.ipynb)
 
 ```python
 from openplaning import PlaningBoat
