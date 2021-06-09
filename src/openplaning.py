@@ -8,57 +8,57 @@ class PlaningBoat():
     """Prismatic planing craft
     
     Attributes:
-        speed (float): Speed (m/s).
-        weight (float): Weidght (N).
-        beam (float): Beam (m).
-        lcg (float): Longitudinal center of gravity, measured from the stern (m).
-        vcg (float): Vertical center of gravity, measured from the keel (m).
-        r_g (float): Radius of gyration (m).
-        beta (float): Deadrise (deg).
-        epsilon (float): Thrust angle w.r.t. keel, CCW with body-fixed origin at 9 o'clock (deg).
-        vT (float): Thrust vertical distance, measured from keel, and positive up (m).
-        lT (float): Thrust horizontal distance, measured from stern, and positive forward (m).
-        length (float): Vessel LOA for seaway behavior estimates (m). Defaults to None.
-        H_sig (float): Significant wave heigth in an irregular sea state (m). Defaults to None.
-        ahr (float): Average hull roughness (m). Defaults to 150*10**-6.
-        Lf (float): Flap chord (m). Defaults to 0.
-        sigma (float): Flap span-beam ratio (dimensionless). Defaults to 0.
-        delta (float): Flap deflection (deg). Defaults to 0.
-        l_air (float): Distance from stern to center of air pressure (m). Defaults to 0.
-        h_air (float): Height from keel to top of square which bounds the air-drag-inducing shape (m). Defaults to 0.
-        b_air (float): m, Transverse width of square which bounds the air-drag-inducing shape (m). Defaults to 0.
-        C_shape (float): Area coefficient for air-drag-inducing shape (dimensionless). C_shape = 1 means the air drag reference area is h_air*b_air. Defaults to 0.
-        C_D (float): Air drag coefficient (dimensionless). Defaults to 0.7.
-        rho (float): Water density (kg/m^3). Defaults to 1025.87.
-        nu (float): Water kinematic viscosity (m^2/s). Defaults to 1.19*10**-6.
-        rho_air (float): Air density (kg/m^3). Defaults to 1.225.
-        g (float): Gravitational acceleration (m/s^2). Defaults to 9.8066.
-        z_wl (float): Vertical distance of center of gravity to the calm water line (m). Defaults to 0.
-        tau (float): Trim angle (deg). Defaults to 5.
+        speed (float): Speed (m/s). It is an input to :class:`PlaningBoat`. 
+        weight (float): Weight (N). It is an input to :class:`PlaningBoat`.
+        beam (float): Beam (m). It is an input to :class:`PlaningBoat`.
+        lcg (float): Longitudinal center of gravity, measured from the stern (m). It is an input to :class:`PlaningBoat`.
+        vcg (float): Vertical center of gravity, measured from the keel (m). It is an input to :class:`PlaningBoat`.
+        r_g (float): Radius of gyration (m). It is an input to :class:`PlaningBoat`.
+        beta (float): Deadrise (deg). It is an input to :class:`PlaningBoat`.
+        epsilon (float): Thrust angle w.r.t. keel, CCW with body-fixed origin at 9 o'clock (deg). It is an input to :class:`PlaningBoat`.
+        vT (float): Thrust vertical distance, measured from keel, and positive up (m). It is an input to :class:`PlaningBoat`.
+        lT (float): Thrust horizontal distance, measured from stern, and positive forward (m). It is an input to :class:`PlaningBoat`.
+        length (float): Vessel LOA for seaway behavior estimates (m). Defaults to None. It is an input to :class:`PlaningBoat`.
+        H_sig (float): Significant wave heigth in an irregular sea state (m). Defaults to None. It is an input to :class:`PlaningBoat`.
+        ahr (float): Average hull roughness (m). Defaults to 150*10**-6. It is an input to :class:`PlaningBoat`.
+        Lf (float): Flap chord (m). Defaults to 0. It is an input to :class:`PlaningBoat`.
+        sigma (float): Flap span-beam ratio (dimensionless). Defaults to 0. It is an input to :class:`PlaningBoat`.
+        delta (float): Flap deflection (deg). Defaults to 0. It is an input to :class:`PlaningBoat`.
+        l_air (float): Distance from stern to center of air pressure (m). Defaults to 0. It is an input to :class:`PlaningBoat`.
+        h_air (float): Height from keel to top of square which bounds the air-drag-inducing shape (m). Defaults to 0. It is an input to :class:`PlaningBoat`.
+        b_air (float): m, Transverse width of square which bounds the air-drag-inducing shape (m). Defaults to 0. It is an input to :class:`PlaningBoat`.
+        C_shape (float): Area coefficient for air-drag-inducing shape (dimensionless). C_shape = 1 means the air drag reference area is h_air*b_air. Defaults to 0. It is an input to :class:`PlaningBoat`.
+        C_D (float): Air drag coefficient (dimensionless). Defaults to 0.7. It is an input to :class:`PlaningBoat`.
+        rho (float): Water density (kg/m^3). Defaults to 1025.87. It is an input to :class:`PlaningBoat`.
+        nu (float): Water kinematic viscosity (m^2/s). Defaults to 1.19*10**-6. It is an input to :class:`PlaningBoat`.
+        rho_air (float): Air density (kg/m^3). Defaults to 1.225. It is an input to :class:`PlaningBoat`.
+        g (float): Gravitational acceleration (m/s^2). Defaults to 9.8066. It is an input to :class:`PlaningBoat`.
+        z_wl (float): Vertical distance of center of gravity to the calm water line (m). Defaults to 0. It is an input to :class:`PlaningBoat`, but modified when running :meth:`get_steady_trim`.
+        tau (float): Trim angle (deg). Defaults to 5. It is an input to :class:`PlaningBoat`, but modified when running :meth:`get_steady_trim`.
         eta_3 (float): Additional heave (m). Initiates to 0.
         eta_5 (float): Additional trim (deg). Initiates to zero.
-        wetted_lengths_type (int, optional): 1 = Use Faltinsen 2010 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1.
-        z_max_type (int, optional): 1 = Uses 3rd order polynomial fit, 2 = Uses cubic interpolation from table. This is only used if wetted_lenghts_type == 1. Defaults to 1.
-        L_K (float): Keel wetted length (m).
-        L_C (float): Chine wetted length (m).
-        lambda_W (float): Mean wetted-length to beam ratio, (L_K+L_C)/(2*beam) (dimensionless).
-        x_s (float): Distance from keel/water-line intersection to start of wetted chine (m).
-        z_max (float): Maximum presssure coordinate coefficient, z_max/Ut (dimensionless).
-        hydrodynamic_force ((3,) ndarray): Hydrodynamic force (N, N, N*m). [F_x, F_z, M_cg] with x, y, rot directions in intertial coordinates.
-        skin_friction ((3,) ndarray): Skin friction force (N, N, N*m). [F_x, F_z, M_cg].
-        air_resistance ((3,) ndarray): Air resistance force (N, N, N*m). [F_x, F_z, M_cg].
-        flap_force ((3,) ndarray): Flap resultant force (N, N, N*m). [F_x, F_z, M_cg].
-        thrust_force ((3,) ndarray): Thrust resultant force (N, N, N*m). [F_x, F_z, M_cg].
-        net_force ((3,) ndarray): Net force (N, N, N*m). [F_x, F_z, M_cg].
-        mass_matrix ((2, 2) ndarray): Mass coefficients matrix. [[A_33 (kg), A_35 (kg*m/rad)], [A_53 (kg*m), A_55 (kg*m^2/rad)]].
-        damping_matrix ((2, 2) ndarray): Damping coefficients matrix. [[B_33 (kg/s), B_35 (kg*m/(s*rad))], [B_53 (kg*m/s), B_55 (kg*m**2/(s*rad))]].
-        restoring_matrix ((2, 2) ndarray): Restoring coefficeints matrix. [[C_33 (N/m), C_35 (N/rad)], [C_53 (N), C_55 (N*m/rad)]].
-        porpoising (list): [[eigenvalue result (bool), est. pitch settling time (s)], [Savitsky chart result (bool), critical trim angle (deg)]].
-        avg_impact_acc ((2,) ndarray): Average impact acceleration at center of gravity and bow (g's). [n_cg, n_bow].
-        R_AW (float): Added resistance in waves (N).
+        wetted_lengths_type (int, optional): 1 = Use Faltinsen 2010 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1. It is an input to :class:`PlaningBoat`.
+        z_max_type (int, optional): 1 = Uses 3rd order polynomial fit, 2 = Uses cubic interpolation from table. This is only used if wetted_lenghts_type == 1. Defaults to 1. It is an input to :class:`PlaningBoat`.
+        L_K (float): Keel wetted length (m). It is updated when running :meth:`get_geo_lengths`.
+        L_C (float): Chine wetted length (m). It is updated when running :meth:`get_geo_lengths`.
+        lambda_W (float): Mean wetted-length to beam ratio, (L_K+L_C)/(2*beam) (dimensionless). It is updated when running :meth:`get_geo_lengths`.
+        x_s (float): Distance from keel/water-line intersection to start of wetted chine (m). It is updated when running :meth:`get_geo_lengths`.
+        z_max (float): Maximum presssure coordinate coefficient, z_max/Ut (dimensionless). It is updated when running :meth:`get_geo_lengths`.
+        hydrodynamic_force ((3,) ndarray): Hydrodynamic force (N, N, N*m). [F_x, F_z, M_cg] with x, y, rot directions in intertial coordinates. It is updated when running :meth:`get_forces`.
+        skin_friction ((3,) ndarray): Skin friction force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
+        air_resistance ((3,) ndarray): Air resistance force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
+        flap_force ((3,) ndarray): Flap resultant force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
+        thrust_force ((3,) ndarray): Thrust resultant force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
+        net_force ((3,) ndarray): Net force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
+        mass_matrix ((2, 2) ndarray): Mass coefficients matrix. [[A_33 (kg), A_35 (kg*m/rad)], [A_53 (kg*m), A_55 (kg*m^2/rad)]]. It is updated when running :meth:`get_eom_matrices`.
+        damping_matrix ((2, 2) ndarray): Damping coefficients matrix. [[B_33 (kg/s), B_35 (kg*m/(s*rad))], [B_53 (kg*m/s), B_55 (kg*m**2/(s*rad))]]. It is updated when running :meth:`get_eom_matrices`.
+        restoring_matrix ((2, 2) ndarray): Restoring coefficeints matrix. [[C_33 (N/m), C_35 (N/rad)], [C_53 (N), C_55 (N*m/rad)]]. It is updated when running :meth:`get_eom_matrices`.
+        porpoising (list): [[eigenvalue result (bool), est. pitch settling time (s)], [Savitsky chart result (bool), critical trim angle (deg)]].  It is updated when running :meth:`check_porpoising`.
+        avg_impact_acc ((2,) ndarray): Average impact acceleration at center of gravity and bow (g's). [n_cg, n_bow]. It is updated when running :meth:`get_seaway_behavior`.
+        R_AW (float): Added resistance in waves (N). It is updated when running :meth:`get_seaway_behavior`.
     """
     
-    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length=None, H_sig=None, ahr=150*10**-6, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19*10**-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1):
+    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length=None, H_sig=None, ahr=150e-6, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1):
         """Initialize attributes for PlaningBoat
         
         Args:
@@ -249,12 +249,13 @@ class PlaningBoat():
     def get_geo_lengths(self):
         """This function outputs the geometric lengths. 
         
-        Adds/updates the following attributes::
-            L_K (float): Keel wetted length (m).
-            L_C (float): Chine wetted length (m).
-            lambda_W (float): Mean wetted-length to beam ratio, (L_K+L_C)/(2*beam) (dimensionless).
-            x_s (float): Distance from keel/water-line intersection to start of wetted chine (m).
-            z_max (float): Maximum presssure coordinate coefficient, z_max/Ut (dimensionless).
+        Adds/updates the following attributes:
+
+        - :attr:`L_K`
+        - :attr:`L_C`
+        - :attr:`lambda_W`
+        - :attr:`x_s`
+        - :attr:`z_max`
         """
         b = self.beam
         lcg = self.lcg
@@ -355,16 +356,24 @@ class PlaningBoat():
     def get_forces(self, runGeoLengths=True):
         """This function calls all the force functions to update the respective object attributes.
         
-        Adds/updates the following attributes::
-            hydrodynamic_force ((3,) ndarray): Hydrodynamic force (N, N, N*m). [F_x, F_z, M_cg] with x, y, rot directions in intertial coordinates.
-            skin_friction ((3,) ndarray): Skin friction force (N, N, N*m). [F_x, F_z, M_cg].
-            air_resistance ((3,) ndarray): Air resistance force (N, N, N*m). [F_x, F_z, M_cg].
-            flap_force ((3,) ndarray): Flap resultant force (N, N, N*m). [F_x, F_z, M_cg].
-            thrust_force ((3,) ndarray): Thrust resultant force (N, N, N*m). [F_x, F_z, M_cg].
-            net_force ((3,) ndarray): Net force (N, N, N*m). [F_x, F_z, M_cg].
+        Adds/updates the following attributes:
+
+        - :attr:`hydrodynamic_force`
+        - :attr:`skin_friction`
+        - :attr:`air_resistance`
+        - :attr:`flap_force`
+        - :attr:`thrust_force`
+        - :attr:`net_force`
         
         Args:
             runGeoLengths (boolean, optional): Calculate the wetted lengths before calculating the forces. Defaults to True.
+
+        Methods:
+            get_hydrodynamic_force(): This function follows Savitsky 1964 and Faltinsen 2005 in calculating the vessel's hydrodynamic forces and moment.
+            get_skin_friction(): This function outputs the frictional force of the vessel using ITTC 1957 and the Bowden and Davison 1974 roughness coefficient.
+            get_air_resistance(): This function estimates the air drag. It assumes a square shape projected area with a shape ceofficient.
+            get_flap_force(): This function outputs the flap forces w.r.t. global coordinates (Savitsky & Brown 1976). Horz: Positive Aft, Vert: Positive Up, Moment: Positive CCW.
+            sum_forces(): This function gets the sum of forces and moments, and consequently the required net thrust. The coordinates are positive aft, positive up, and positive counterclockwise.
         """
         if runGeoLengths:
             self.get_geo_lengths() #Calculated wetted lengths in get_forces()
@@ -588,9 +597,10 @@ class PlaningBoat():
     def get_steady_trim(self, x0=[0, 3], tauLims=[0.5, 35], tolF=10**-6, maxiter=50):
         """This function finds and sets the equilibrium point when the vessel is steadily running in calm water.
         
-        Updates the following attributes::
-            z_wl (float, optional): Vertical distance of center of gravity to the calm water line (m). Defaults to 0.
-            tau (float, optional): Trim angle (deg). Defaults to 5.
+        Updates the following attributes:
+
+        - :attr:`z_wl`
+        - :attr:`tau`
 
         Args:
             x0 (list of float): Initial guess for equilibirum point [z_wl (m), tau (deg)]. Defaults to [0, 3].
@@ -621,13 +631,19 @@ class PlaningBoat():
     def get_eom_matrices(self, runGeoLengths=True):
         """This function returns the mass, damping, and stiffness matrices following Faltinsen 2010.
 
-        Adds/updates the following parameters::
-            mass_matrix ((2, 2) ndarray): Mass coefficients matrix. [[A_33 (kg), A_35 (kg*m/rad)], [A_53 (kg*m), A_55 (kg*m^2/rad)]].
-            damping_matrix ((2, 2) ndarray): Damping coefficients matrix. [[B_33 (kg/s), B_35 (kg*m/(s*rad))], [B_53 (kg*m/s), B_55 (kg*m**2/(s*rad))]].
-            restoring_matrix ((2, 2) ndarray): Restoring coefficeints matrix. [[C_33 (N/m), C_35 (N/rad)], [C_53 (N), C_55 (N*m/rad)]].
+        Adds/updates the following parameters:
+            
+        - :attr:`mass_matrix`
+        - :attr:`damping_matrix`
+        - :attr:`restoring_matrix`
 
         Args:
             runGeoLengths (boolean, optional): Calculate the wetted lengths before calculating the EOM matrices. Defaults to True.
+
+        Methods:
+            get_mass_matrix(): This function returns the added mass coefficients following Sec. 9.4.1 of Faltinsen 2010, including weight and moment of inertia.
+            get_damping_matrix(): This function returns the damping coefficients following Sec. 9.4.1 of Faltinsen 2010.
+            get_restoring_matrix(diffType=1, step=10**-6.6): This function returns the restoring coefficients following the approach in Sec. 9.4.1 of Faltinsen 2010.
         """
         if runGeoLengths:
             self.get_geo_lengths() #Calculated wetted lengths in get_eom_matrices()
@@ -731,7 +747,7 @@ class PlaningBoat():
                 diffType (int, optional): 1 (recommended) = Complex step method, 2 = Foward step difference. Defaults to 1.
                 step (float, optional): Step size if using diffType == 2. Defaults to 10**-6.
             """
-            def func(eta):
+            def _func(eta):
                 self.eta_3 = eta[0] 
                 self.eta_5 = eta[1]
                 self.get_forces()
@@ -741,9 +757,9 @@ class PlaningBoat():
             temp_eta_5 = self.eta_5
             
             if diffType == 1:
-                C_full = -ndmath.complexGrad(func, [temp_eta_3, temp_eta_5])
+                C_full = -ndmath.complexGrad(_func, [temp_eta_3, temp_eta_5])
             elif diffType == 2:
-                C_full = -ndmath.finiteGrad(func, [temp_eta_3, temp_eta_5], 10**-6.6)
+                C_full = -ndmath.finiteGrad(_func, [temp_eta_3, temp_eta_5], 10**-6.6)
 
             #Reset values
             self.eta_3 = temp_eta_3
@@ -765,8 +781,9 @@ class PlaningBoat():
     def check_porpoising(self, stepEstimateType=1):
         """This function checks for porpoising.
 
-        Adds/updates the following parameters::
-            porpoising (list): [[eigenvalue result (bool), est. pitch settling time (s)], [Savitsky chart result (bool), critical trim angle (deg)]].
+        Adds/updates the following parameters:
+        
+        - :attr:`porpoising` (list):
         
         Args:
             stepEstimateType (int, optional): Pitch step response settling time estimate type, 1 = -3/np.real(eigVals[0])], 2 = Time-domain simulation estimate. Defaults to 1.        
@@ -828,9 +845,10 @@ class PlaningBoat():
     def get_seaway_behavior(self):
         """This function calculates the seaway behavior as stated in Savitsky & Brown '76.
         
-        Adds/updates the following parameters::
-            avg_impact_acc ((2,) ndarray): Average impact acceleration at center of gravity and bow (g's). [n_cg, n_bow].
-            R_AW (float): Added resistance in waves (N).
+        Adds/updates the following parameters:
+        
+        - :attr:`avg_impact_acc`
+        - :attr:`R_AW`
         """
         if self.H_sig is None:
             self.H_sig = self.beam*0.5 #Arbitrary wave height if no user-defined wave height
