@@ -1,1 +1,4 @@
+numpy
+scipy
+ndmath
 myst_parser
