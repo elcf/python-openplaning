@@ -37,8 +37,8 @@ class PlaningBoat():
         tau (float): Trim angle (deg). Defaults to 5. It is an input to :class:`PlaningBoat`, but modified when running :meth:`get_steady_trim`.
         eta_3 (float): Additional heave (m). Initiates to 0.
         eta_5 (float): Additional trim (deg). Initiates to zero.
-        wetted_lengths_type (int, optional): 1 = Use Faltinsen 2010 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1. It is an input to :class:`PlaningBoat`.
-        z_max_type (int, optional): 1 = Uses 3rd order polynomial fit, 2 = Uses cubic interpolation from table. This is only used if wetted_lenghts_type == 1. Defaults to 1. It is an input to :class:`PlaningBoat`.
+        wetted_lengths_type (int): 1 = Use Faltinsen 2010 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1. It is an input to :class:`PlaningBoat`.
+        z_max_type (int): 1 = Uses 3rd order polynomial fit, 2 = Uses cubic interpolation from table. This is only used if wetted_lenghts_type == 1. Defaults to 1. It is an input to :class:`PlaningBoat`.
         L_K (float): Keel wetted length (m). It is updated when running :meth:`get_geo_lengths`.
         L_C (float): Chine wetted length (m). It is updated when running :meth:`get_geo_lengths`.
         lambda_W (float): Mean wetted-length to beam ratio, (L_K+L_C)/(2*beam) (dimensionless). It is updated when running :meth:`get_geo_lengths`.
