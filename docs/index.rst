@@ -7,7 +7,7 @@ Welcome to OpenPlaning's documentation!
 =======================================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: Contents:
 
    README.md
@@ -18,4 +18,3 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`search`
