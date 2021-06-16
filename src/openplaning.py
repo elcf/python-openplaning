@@ -497,7 +497,7 @@ class PlaningBoat():
                 #Vertical force
                 F_z = - R_f * np.sin(pi/180*(tau + eta_5))
 
-                #Moment about CG (Axis consistent with Fig. 9.24 of Faltinsen (P. 366)
+                #Moment about CG (Axis consistent with Fig. 9.24 of Faltinsen (P. 366))
                 M_cg = R_f * (l_f - vcg)
                 
             #Update values
