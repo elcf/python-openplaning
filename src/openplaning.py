@@ -371,7 +371,7 @@ class PlaningBoat():
         Methods:
             get_hydrodynamic_force(): This function follows Savitsky 1964 and Faltinsen 2005 in calculating the vessel's hydrodynamic forces and moment.
             get_skin_friction(): This function outputs the frictional force of the vessel using ITTC 1957 and the Bowden and Davison 1974 roughness coefficient.
-            get_air_resistance(): This function estimates the air drag. It assumes a square shape projected area with a shape ceofficient.
+            get_air_resistance(): This function estimates the air drag. It assumes a square shape projected area with a shape coefficient.
             get_flap_force(): This function outputs the flap forces w.r.t. global coordinates (Savitsky & Brown 1976). Horz: Positive Aft, Vert: Positive Up, Moment: Positive CCW.
             sum_forces(): This function gets the sum of forces and moments, and consequently the required net thrust. The coordinates are positive aft, positive up, and positive counterclockwise.
         """
@@ -504,7 +504,7 @@ class PlaningBoat():
             self.skin_friction = np.array([F_x, F_z, M_cg])
                 
         def get_air_resistance():
-            """This function estimates the air drag. It assumes a square shape projected area with a shape ceofficient.
+            """This function estimates the air drag. It assumes a square shape projected area with a shape coefficient.
             """
             if C_shape == 0 or b_air == 0:
                 self.air_resistance = np.array([0, 0, 0])
