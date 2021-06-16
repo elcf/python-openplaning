@@ -513,7 +513,7 @@ class PlaningBoat():
             #Vertical distance from calm water line to keel at LOA
             a_dist = np.sin(pi/180*(tau + eta_5))*(l_air-L_K)
             
-            #Vertical distance from keel to horizontal line level with ACV's height
+            #Vertical distance from keel to horizontal line level with boat's height
             b_dist = np.cos(pi/180*(tau + eta_5))*h_air
             
             #Vertical distance from CG to center of square (moment arm, positive is CG above)
