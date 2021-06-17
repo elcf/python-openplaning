@@ -43,7 +43,7 @@ class PlaningBoat():
         L_C (float): Chine wetted length (m). It is updated when running :meth:`get_geo_lengths`.
         lambda_W (float): Mean wetted-length to beam ratio, (L_K+L_C)/(2*beam) (dimensionless). It is updated when running :meth:`get_geo_lengths`.
         x_s (float): Distance from keel/water-line intersection to start of wetted chine (m). It is updated when running :meth:`get_geo_lengths`.
-        z_max (float): Maximum presssure coordinate coefficient, z_max/Ut (dimensionless). It is updated when running :meth:`get_geo_lengths`.
+        z_max (float): Maximum pressure coordinate coefficient, z_max/Ut (dimensionless). It is updated when running :meth:`get_geo_lengths`.
         hydrodynamic_force ((3,) ndarray): Hydrodynamic force (N, N, N*m). [F_x, F_z, M_cg] with x, y, rot directions in intertial coordinates. It is updated when running :meth:`get_forces`.
         skin_friction ((3,) ndarray): Skin friction force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
         air_resistance ((3,) ndarray): Air resistance force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
@@ -201,7 +201,7 @@ class PlaningBoat():
             ['L_C', self.L_C, 'm, chine wetted length'],
             ['\u03BB', self.lambda_W, 'mean wetted-length to beam ratio (L_K+L_C)/(2*beam)'],
             ['x_s', self.x_s, 'm, distance from keel/water-line intersection to start of wetted chine'],
-            ['z_max', self.z_max, 'maximum presssure coordinate coefficient (z_max/Ut)'],
+            ['z_max', self.z_max, 'maximum pressure coordinate coefficient (z_max/Ut)'],
             [''],
             ['---FORCES [F_x (N, +aft), F_z (N, +up), M_cg (N*m, +pitch up)]---'],
             ['Hydrodynamic Force', self.hydrodynamic_force, ''],
