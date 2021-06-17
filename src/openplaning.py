@@ -37,7 +37,7 @@ class PlaningBoat():
         tau (float): Trim angle (deg). Defaults to 5. It is an input to :class:`PlaningBoat`, but modified when running :meth:`get_steady_trim`.
         eta_3 (float): Additional heave (m). Initiates to 0.
         eta_5 (float): Additional trim (deg). Initiates to zero.
-        wetted_lengths_type (int): 1 = Use Faltinsen 2010 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1. It is an input to :class:`PlaningBoat`.
+        wetted_lengths_type (int): 1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1. It is an input to :class:`PlaningBoat`.
         z_max_type (int): 1 = Uses 3rd order polynomial fit, 2 = Uses cubic interpolation from table. This is only used if wetted_lenghts_type == 1. Defaults to 1. It is an input to :class:`PlaningBoat`.
         L_K (float): Keel wetted length (m). It is updated when running :meth:`get_geo_lengths`.
         L_C (float): Chine wetted length (m). It is updated when running :meth:`get_geo_lengths`.
@@ -89,7 +89,7 @@ class PlaningBoat():
             nu (float, optional): Water kinematic viscosity (m^2/s). Defaults to 1.19*10**-6.
             rho_air (float, optional): Air density (kg/m^3). Defaults to 1.225.
             g (float, optional): Gravitational acceleration (m/s^2). Defaults to 9.8066.
-            wetted_lengths_type (int, optional): 1 = Use Faltinsen 2010 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1.
+            wetted_lengths_type (int, optional): 1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1.
             z_max_type (int, optional): 1 = Uses 3rd order polynomial fit, 2 = Uses cubic interpolation from table. This is only used if wetted_lenghts_type == 1. Defaults to 1.
         """
         self.speed = speed
@@ -193,7 +193,7 @@ class PlaningBoat():
             ['g', self.g, 'm/s\u00B2, gravitational acceleration'],
             [''],
             ['---WETTED LENGTH OPTIONS---'],
-            ['LC_type', self.LC_type, '(1 = Use Faltinsen 2010 wave rise approximation, 2 = Use Savitsky\'s \'64 approach, 3 = Use Savitsky\'s \'76 approach)'],
+            ['LC_type', self.LC_type, '(1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky\'s \'64 approach, 3 = Use Savitsky\'s \'76 approach)'],
             ['zmax_type', self.zmax_type, '(1 = Uses 3rd order polynomial fit (faster, recommended), 2 = Use cubic interpolation)'],
             [''],
             ['---WETTED LENGTHS---'],
@@ -269,19 +269,19 @@ class PlaningBoat():
         wetted_lengths_type = self.LC_type
         z_max_type = self.zmax_type
         
-        #Keel wetted length, Eq. 9.50 of Faltinsen 2010
+        #Keel wetted length, Eq. 9.50 of Faltinsen 2005, page 367
         L_K = lcg + vcg / np.tan(pi/180*(tau + eta_5)) - (z_wl + eta_3) / np.sin(pi/180*(tau + eta_5))
         if L_K < 0:
             L_K = 0
         
         if wetted_lengths_type == 1:
-            #z_max/Vt coefficient, Table 8.3 of Faltinsen 2010, page 303---------------
+            #z_max/Vt coefficient, Table 8.3 of Faltinsen 2005, page 303---------------
             beta_table = [4, 7.5, 10, 15, 20, 25, 30, 40]
             z_max_table = [0.5695, 0.5623, 0.5556, 0.5361, 0.5087, 0.4709, 0.4243, 0.2866]
 
             #Extrapolation warning
             if beta < beta_table[0] or beta > beta_table[-1]:
-                warnings.warn('Deadrise ({0:.3f}) outside the interpolation range of 4-40 deg (Table 8.3 of Faltinsen 2010). Extrapolated values might be inaccurate.'.format(beta), stacklevel=2)
+                warnings.warn('Deadrise ({0:.3f}) outside the interpolation range of 4-40 deg (Table 8.3 of Faltinsen 2005). Extrapolated values might be inaccurate.'.format(beta), stacklevel=2)
 
             if z_max_type == 1:
                 z_max = np.polyval([-2.100644618790201e-006, -6.815747611588763e-005, -1.130563334939335e-003, 5.754510457848798e-001], beta)
@@ -295,7 +295,7 @@ class PlaningBoat():
             if x_s < 0:
                 x_s = 0
 
-            #Chine wetted length, Eq. 9.51 of Faltinsen 2010
+            #Chine wetted length, Eq. 9.51 of Faltinsen 2005
             L_C = L_K - x_s
             if L_C < 0:
                 L_C = 0
@@ -319,7 +319,7 @@ class PlaningBoat():
             #Mean wetted length-to-beam ratio
             lambda_W = (L_K + L_C)/(2*b)
 
-            #z_max/Vt coefficient (E. 9.10 of Faltinsen 2010 rearranged)
+            #z_max/Vt coefficient (E. 9.10 of Faltinsen 2005 rearranged)
             z_max = 0.5 * b * np.tan(pi/180*beta) / (x_s * (pi/180)*(tau + eta_5)) - 1
         
         elif wetted_lengths_type == 3:
@@ -339,7 +339,7 @@ class PlaningBoat():
 
             x_s = L_K-L_C
 
-            #z_max/Vt coefficient (E. 9.10 of Faltinsen 2010 rearranged)
+            #z_max/Vt coefficient (E. 9.10 of Faltinsen 2005 rearranged)
             z_max = 0.5 * b * np.tan(pi/180*beta) / (x_s * (pi/180)*(tau + eta_5)) - 1
         
         if self.length is not None:
@@ -629,7 +629,7 @@ class PlaningBoat():
         warnings.filterwarnings("default", category=UserWarning)
         
     def get_eom_matrices(self, runGeoLengths=True):
-        """This function returns the mass, damping, and stiffness matrices following Faltinsen 2010.
+        """This function returns the mass, damping, and stiffness matrices following Faltinsen 2005.
 
         Adds/updates the following parameters:
             
@@ -641,9 +641,9 @@ class PlaningBoat():
             runGeoLengths (boolean, optional): Calculate the wetted lengths before calculating the EOM matrices. Defaults to True.
 
         Methods:
-            get_mass_matrix(): This function returns the added mass coefficients following Sec. 9.4.1 of Faltinsen 2010, including weight and moment of inertia.
-            get_damping_matrix(): This function returns the damping coefficients following Sec. 9.4.1 of Faltinsen 2010.
-            get_restoring_matrix(diffType=1, step=10**-6.6): This function returns the restoring coefficients following the approach in Sec. 9.4.1 of Faltinsen 2010.
+            get_mass_matrix(): This function returns the added mass coefficients following Sec. 9.4.1 of Faltinsen 2005, including weight and moment of inertia.
+            get_damping_matrix(): This function returns the damping coefficients following Sec. 9.4.1 of Faltinsen 2005.
+            get_restoring_matrix(diffType=1, step=10**-6.6): This function returns the restoring coefficients following the approach in Sec. 9.4.1 of Faltinsen 2005.
         """
         if runGeoLengths:
             self.get_geo_lengths() #Calculated wetted lengths in get_eom_matrices()
@@ -669,13 +669,13 @@ class PlaningBoat():
         pi = np.pi
         
         def get_mass_matrix():
-            """This function returns the added mass coefficients following Sec. 9.4.1 of Faltinsen 2010, including weight and moment of inertia
+            """This function returns the added mass coefficients following Sec. 9.4.1 of Faltinsen 2005, including weight and moment of inertia
             """
             
             #Distance of CG from keel-WL intersection
             x_G = L_K - lcg
 
-            #K constant (Eq. 9.63 of Faltinsen 2010)
+            #K constant (Eq. 9.63 of Faltinsen 2005)
             K = (pi / np.sin(pi/180*beta) * gamma(1.5 - beta/180) / (gamma(1 - beta/180)**2 * gamma(0.5 + beta/180)) - 1) / np.tan(pi/180*beta)
 
             kappa = (1 + z_max) * (pi/180)*(tau + eta_5) #User defined constant
@@ -708,7 +708,7 @@ class PlaningBoat():
             self.mass_matrix = np.array([[A_33, A_35], [A_53, A_55]])
             
         def get_damping_matrix():
-            """This function returns the damping coefficients following Sec. 9.4.1 of Faltinsen 2010
+            """This function returns the damping coefficients following Sec. 9.4.1 of Faltinsen 2005
             """
             #Heave-heave added mass (need to substract W/g since it was added)
             A_33 = self.mass_matrix[0,0] - W/g
@@ -718,7 +718,7 @@ class PlaningBoat():
             else:
                 d = (1 + z_max) * (pi/180)*(tau + eta_5) * L_K
 
-            #K constant (Eq. 9.63 of Faltinsen 2010, P. 369)
+            #K constant (Eq. 9.63 of Faltinsen 2005, P. 369)
             K = (pi / np.sin(pi/180*beta) * gamma(1.5 - beta/180) / (gamma(1 - beta/180)**2 * gamma(0.5 + beta/180)) - 1) / np.tan(pi/180*beta)
 
             #2D Added mass coefficient in heave
@@ -741,7 +741,7 @@ class PlaningBoat():
             self.damping_matrix = np.array([[B_33, B_35], [B_53, B_55]])
             
         def get_restoring_matrix(diffType=1, step=10**-6.6):
-            """This function returns the restoring coefficients following the approach in Sec. 9.4.1 of Faltinsen 2010
+            """This function returns the restoring coefficients following the approach in Sec. 9.4.1 of Faltinsen 2005
             
             Args:
                 diffType (int, optional): 1 (recommended) = Complex step method, 2 = Foward step difference. Defaults to 1.
