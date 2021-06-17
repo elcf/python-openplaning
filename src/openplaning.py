@@ -25,8 +25,8 @@ class PlaningBoat():
         sigma (float): Flap span-beam ratio (dimensionless). Defaults to 0. It is an input to :class:`PlaningBoat`.
         delta (float): Flap deflection (deg). Defaults to 0. It is an input to :class:`PlaningBoat`.
         l_air (float): Distance from stern to center of air pressure (m). Defaults to 0. It is an input to :class:`PlaningBoat`.
-        h_air (float): Height from keel to top of square which bounds the air-drag-inducing shape (m). Defaults to 0. It is an input to :class:`PlaningBoat`.
-        b_air (float): m, Transverse width of square which bounds the air-drag-inducing shape (m). Defaults to 0. It is an input to :class:`PlaningBoat`.
+        h_air (float): Height from keel to top of square which bounds the air-drag-inducing area (m). Defaults to 0. It is an input to :class:`PlaningBoat`.
+        b_air (float): Transverse width of square which bounds the air-drag-inducing area (m). Defaults to 0. It is an input to :class:`PlaningBoat`.
         C_shape (float): Area coefficient for air-drag-inducing shape (dimensionless). C_shape = 1 means the air drag reference area is h_air*b_air. Defaults to 0. It is an input to :class:`PlaningBoat`.
         C_D (float): Air drag coefficient (dimensionless). Defaults to 0.7. It is an input to :class:`PlaningBoat`.
         rho (float): Water density (kg/m^3). Defaults to 1025.87. It is an input to :class:`PlaningBoat`.
@@ -79,8 +79,8 @@ class PlaningBoat():
             sigma (float, optional): Flap span-beam ratio (dimensionless). Defaults to 0.
             delta (float, optional): Flap deflection (deg). Defaults to 0.
             l_air (float, optional): Distance from stern to center of air pressure (m). Defaults to 0.
-            h_air (float, optional): Height from keel to top of square which bounds the air-drag-inducing shape (m). Defaults to 0.
-            b_air (float, optional): m, Transverse width of square which bounds the air-drag-inducing shape (m). Defaults to 0.
+            h_air (float, optional): Height from keel to top of square which bounds the air-drag-inducing area (m). Defaults to 0.
+            b_air (float, optional): Transverse width of square which bounds the air-drag-inducing area (m). Defaults to 0.
             C_shape (float, optional): Area coefficient for air-drag-inducing shape (dimensionless). C_shape = 1 means the air drag reference area is h_air*b_air. Defaults to 0.
             C_D (float, optional): Air drag coefficient (dimensionless). Defaults to 0.7.
             z_wl (float, optional): Vertical distance of center of gravity to the calm water line (m). Defaults to 0.
