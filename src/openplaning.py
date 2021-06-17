@@ -52,7 +52,7 @@ class PlaningBoat():
         net_force ((3,) ndarray): Net force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
         mass_matrix ((2, 2) ndarray): Mass coefficients matrix. [[A_33 (kg), A_35 (kg*m/rad)], [A_53 (kg*m), A_55 (kg*m^2/rad)]]. It is updated when running :meth:`get_eom_matrices`.
         damping_matrix ((2, 2) ndarray): Damping coefficients matrix. [[B_33 (kg/s), B_35 (kg*m/(s*rad))], [B_53 (kg*m/s), B_55 (kg*m**2/(s*rad))]]. It is updated when running :meth:`get_eom_matrices`.
-        restoring_matrix ((2, 2) ndarray): Restoring coefficeints matrix. [[C_33 (N/m), C_35 (N/rad)], [C_53 (N), C_55 (N*m/rad)]]. It is updated when running :meth:`get_eom_matrices`.
+        restoring_matrix ((2, 2) ndarray): Restoring coefficients matrix. [[C_33 (N/m), C_35 (N/rad)], [C_53 (N), C_55 (N*m/rad)]]. It is updated when running :meth:`get_eom_matrices`.
         porpoising (list): [[eigenvalue result (bool), est. pitch settling time (s)], [Savitsky chart result (bool), critical trim angle (deg)]].  It is updated when running :meth:`check_porpoising`.
         avg_impact_acc ((2,) ndarray): Average impact acceleration at center of gravity and bow (g's). [n_cg, n_bow]. It is updated when running :meth:`get_seaway_behavior`.
         R_AW (float): Added resistance in waves (N). It is updated when running :meth:`get_seaway_behavior`.
