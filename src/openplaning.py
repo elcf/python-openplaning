@@ -609,7 +609,7 @@ class PlaningBoat():
             maxiter (float): Maximum iterations. Defaults to 50.
         """
         def _boatForces(x):
-            self.z_wl = x[0]
+            self.z_wl = x[0]/10 #the division is for normalization of the variables
             self.tau = x[1]
             self.get_forces()
             return self.net_force[1:3]
@@ -618,14 +618,14 @@ class PlaningBoat():
             return ndmath.complexGrad(_boatForces, x)
 
         def _L_K(x):
-            self.z_wl = x[0]
+            self.z_wl = x[0]/10
             self.tau = x[1]
             self.get_geo_lengths()
             return [-self.L_K]
         
         xlims = np.array([[-np.Inf, np.Inf], tauLims])
         warnings.filterwarnings("ignore", category=UserWarning)
-        _ = ndmath.nDimNewton(_boatForces, x0, _boatForcesPrime, tolF, maxiter, xlims, hehcon=_L_K)
+        [self.z_wl, self.tau] = ndmath.nDimNewton(_boatForces, x0, _boatForcesPrime, tolF, maxiter, xlims, hehcon=_L_K)/[10, 1]
         warnings.filterwarnings("default", category=UserWarning)
         
     def get_eom_matrices(self, runGeoLengths=True):
