@@ -124,8 +124,8 @@ class PlaningBoat():
         
         self.gravity_force = np.array([0, -self.weight, 0])
         
-        self.LC_type = wetted_lengths_type
-        self.zmax_type = z_max_type
+        self.wetted_lengths_type = wetted_lengths_type
+        self.z_max_type = z_max_type
         
     def print_description(self, sigFigs=7, runAllFunctions=True):
         """Returns a formatted description of the vessel.
@@ -193,8 +193,8 @@ class PlaningBoat():
             ['g', self.g, 'm/s\u00B2, gravitational acceleration'],
             [''],
             ['---WETTED LENGTH OPTIONS---'],
-            ['LC_type', self.LC_type, '(1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky\'s \'64 approach, 3 = Use Savitsky\'s \'76 approach)'],
-            ['zmax_type', self.zmax_type, '(1 = Uses 3rd order polynomial fit (faster, recommended), 2 = Use cubic interpolation)'],
+            ['wetted_lengths_type', self.wetted_lengths_type, '(1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky\'s \'64 approach, 3 = Use Savitsky\'s \'76 approach)'],
+            ['z_max_type', self.z_max_type, '(1 = Uses 3rd order polynomial fit (faster, recommended), 2 = Use cubic interpolation)'],
             [''],
             ['---WETTED LENGTHS---'],
             ['L_K', self.L_K, 'm, keel wetted length'],
@@ -266,8 +266,8 @@ class PlaningBoat():
         eta_3 = self.eta_3
         eta_5 = self.eta_5
         pi = np.pi
-        wetted_lengths_type = self.LC_type
-        z_max_type = self.zmax_type
+        wetted_lengths_type = self.wetted_lengths_type
+        z_max_type = self.z_max_type
         
         #Keel wetted length, Eq. 9.50 of Faltinsen 2005, page 367
         L_K = lcg + vcg / np.tan(pi/180*(tau + eta_5)) - (z_wl + eta_3) / np.sin(pi/180*(tau + eta_5))
