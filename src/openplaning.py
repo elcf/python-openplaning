@@ -228,7 +228,7 @@ class PlaningBoat():
             ['---BEHAVIOR IN WAVES---'],
             ['H_sig', self.H_sig, 'm, significant wave heigth'],
             ['R_AW', self.R_AW, 'N, added resistance in waves'],
-            ['Average impact acceleration [n_cg, n_bow] (g\'s)', self.avgImpactAcc, ''],
+            ['Average impact acceleration [n_cg, n_bow] (g\'s)', self.avg_impact_acc, ''],
         ]            
         
         cLens=[16,0,0] #Min spacing for columns
@@ -906,5 +906,5 @@ class PlaningBoat():
         avg_impact_acc = np.array([n_cg, n_bow])
         
         #Update values
-        self.avgImpactAcc = avg_impact_acc
+        self.avg_impact_acc = avg_impact_acc
         self.R_AW = R_AW[0]
