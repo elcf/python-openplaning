@@ -618,9 +618,9 @@ class PlaningBoat():
             return ndmath.complexGrad(_boatForces, x)
 
         def _L_K(x):
-            self.z_wl = x[0]/10
-            self.tau = x[1]
-            self.get_geo_lengths()
+            # self.z_wl = x[0]/10
+            # self.tau = x[1]
+            # self.get_geo_lengths() #No need to call, because ndmath's nDimNewton allways calls the obj function before calling this "constraint"
             return [-self.L_K]
         
         xlims = np.array([[-np.Inf, np.Inf], tauLims])
