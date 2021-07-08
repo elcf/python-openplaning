@@ -14,7 +14,7 @@ pip install openplaning
 
 ## Examples
 
-You can run the example below online with Binder:
+You can run the example below, plus an optimization case study, online with Binder:
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/elcf/binder-openplaning/main?filepath=OpenPlaningExamples.ipynb)
 
 ```python
