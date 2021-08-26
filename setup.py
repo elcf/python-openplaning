@@ -28,4 +28,5 @@ setuptools.setup(
         'scipy',
         'ndmath',
     ],
+    include_package_data=True,
 )
