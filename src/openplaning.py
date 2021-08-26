@@ -54,11 +54,12 @@ class PlaningBoat():
         damping_matrix ((2, 2) ndarray): Damping coefficients matrix. [[B_33 (kg/s), B_35 (kg*m/(s*rad))], [B_53 (kg*m/s), B_55 (kg*m**2/(s*rad))]]. It is updated when running :meth:`get_eom_matrices`.
         restoring_matrix ((2, 2) ndarray): Restoring coefficients matrix. [[C_33 (N/m), C_35 (N/rad)], [C_53 (N), C_55 (N*m/rad)]]. It is updated when running :meth:`get_eom_matrices`.
         porpoising (list): [[eigenvalue result (bool), est. pitch settling time (s)], [Savitsky chart result (bool), critical trim angle (deg)]].  It is updated when running :meth:`check_porpoising`.
+        seaway_drag_type (int): 1 = Use Savitsky's '76 approximation, 2 = Use Fridsma's '71 designs charts. Defaults to 1. It is an input to :class:`PlaningBoat`.
         avg_impact_acc ((2,) ndarray): Average impact acceleration at center of gravity and bow (g's). [n_cg, n_bow]. It is updated when running :meth:`get_seaway_behavior`.
         R_AW (float): Added resistance in waves (N). It is updated when running :meth:`get_seaway_behavior`.
     """
     
-    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length=None, H_sig=None, ahr=150e-6, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1):
+    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length=None, H_sig=None, ahr=150e-6, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1, seaway_drag_type=1):
         """Initialize attributes for PlaningBoat
         
         Args:
@@ -91,6 +92,7 @@ class PlaningBoat():
             g (float, optional): Gravitational acceleration (m/s^2). Defaults to 9.8066.
             wetted_lengths_type (int, optional): 1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1.
             z_max_type (int, optional): 1 = Uses 3rd order polynomial fit, 2 = Uses cubic interpolation from table. This is only used if wetted_lenghts_type == 1. Defaults to 1.
+            seaway_drag_type (int, optional): 1 = Use Savitsky's '76 approximation, 2 = Use Fridsma's '71 designs charts. Defaults to 1.
         """
         self.speed = speed
         self.weight = weight
@@ -126,6 +128,8 @@ class PlaningBoat():
         
         self.wetted_lengths_type = wetted_lengths_type
         self.z_max_type = z_max_type
+
+        self.seaway_drag_type = seaway_drag_type
         
     def print_description(self, sigFigs=7, runAllFunctions=True):
         """Returns a formatted description of the vessel.
@@ -868,43 +872,110 @@ class PlaningBoat():
         Delta = Delta_LT*2240 #Displacement in lbf
         L = self.length*3.281 #Length in ft
         b = self.beam*3.281 #Beam in ft
-        V_K = self.speed*1.944 #Speed in knots
+        Vk = self.speed*1.944 #Speed in knots
+        Vk_L = Vk/np.sqrt(L) #Vk/sqrt(L)
         H_sig = H_sig*3.281 #Significant wave height in ft
         
         w = self.rho*self.g/(4.448*35.315) #Specific weight in lbf/ft^3
         
         C_Delta = Delta/(w*b**3) #Static beam-loading coefficient
-               
-        #Check that variables are inside range of applicability (P. 395 of Savitsky & Brown '76)
-        P1 = Delta_LT/(0.01*L)**3
-        P2 = L/b
-        P5 = H_sig/b
-        P6 = V_K/np.sqrt(L)
-        if P1 < 100 or P1 > 250:
-            warnings.warn('Vessel displacement coefficient = {0:.3f}, outside of range of applicability (100 <= Delta_LT/(0.01*L)^3 <= 250, with units LT/ft^3). Results are extrapolations.'.format(P1), stacklevel=2)
-        if P2 < 3 or P2 > 5:
-            warnings.warn('Vessel length/beam = {0:.3f}, outside of range of applicability (3 <= L/b <= 5). Results are extrapolations.'.format(P2), stacklevel=2)
-        if tau < 3 or tau > 7:
-            warnings.warn('Vessel trim = {0:.3f}, outside of range of applicability (3 deg <= tau <= 7 deg). Results are extrapolations.'.format(tau), stacklevel=2)
-        if beta < 10 or beta > 30:
-            warnings.warn('Vessel deadrise = {0:.3f}, outside of range of applicability (10 deg <= beta <= 30 deg). Results are extrapolations.'.format(beta), stacklevel=2)
-        if P5 < 0.2 or P5 > 0.7:
-            warnings.warn('Significant wave height / beam = {0:.3f}, outside of range of applicability (0.2 <= H_sig/b <= 0.7). Results are extrapolations.'.format(P5), stacklevel=2)
-        if P6 < 2 or P6 > 6:
-            warnings.warn('Speed coefficient = {0:.3f}, outside of range of applicability (2 <= V_K/sqrt(L) <= 6, with units knots/ft^0.5). Results are extrapolations.'.format(P6), stacklevel=2)
+
+        if self.seaway_drag_type == 1: #Savitsky '76
+            #Check that variables are inside range of applicability (P. 395 of Savitsky & Brown '76)
+            P1 = Delta_LT/(0.01*L)**3
+            P2 = L/b
+            P5 = H_sig/b
+            P6 = Vk_L
+            if P1 < 100 or P1 > 250:
+                warnings.warn('Vessel displacement coefficient = {0:.3f}, outside of range of applicability (100 <= Delta_LT/(0.01*L)^3 <= 250, with units LT/ft^3). Results are extrapolations.'.format(P1), stacklevel=2)
+            if P2 < 3 or P2 > 5:
+                warnings.warn('Vessel length/beam = {0:.3f}, outside of range of applicability (3 <= L/b <= 5). Results are extrapolations.'.format(P2), stacklevel=2)
+            if tau < 3 or tau > 7:
+                warnings.warn('Vessel trim = {0:.3f}, outside of range of applicability (3 deg <= tau <= 7 deg). Results are extrapolations.'.format(tau), stacklevel=2)
+            if beta < 10 or beta > 30:
+                warnings.warn('Vessel deadrise = {0:.3f}, outside of range of applicability (10 deg <= beta <= 30 deg). Results are extrapolations.'.format(beta), stacklevel=2)
+            if P5 < 0.2 or P5 > 0.7:
+                warnings.warn('Significant wave height / beam = {0:.3f}, outside of range of applicability (0.2 <= H_sig/b <= 0.7). Results are extrapolations.'.format(P5), stacklevel=2)
+            if P6 < 2 or P6 > 6:
+                warnings.warn('Speed coefficient = {0:.3f}, outside of range of applicability (2 <= Vk/sqrt(L) <= 6, with units knots/ft^0.5). Results are extrapolations.'.format(P6), stacklevel=2)
+                
+            R_AW_2 = (w*b**3)*66*10**-6*(H_sig/b+0.5)*(L/b)**3/C_Delta+0.0043*(tau-4) #Added resistance at Vk/sqrt(L) = 2
+            R_AW_4 = (Delta)*(0.3*H_sig/b)/(1+2*H_sig/b)*(1.76-tau/6-2*np.tan(beta*pi/180)**3) #Vk/sqrt(L) = 4
+            R_AW_6 = (w*b**3)*(0.158*H_sig/b)/(1+(H_sig/b)*(0.12*beta-21*C_Delta*(5.6-L/b)+7.5*(6-L/b))) #Vk/sqrt(L) = 6
+            R_AWs = np.array([R_AW_2, R_AW_4, R_AW_6])
             
-        R_AW_2 = (w*b**3)*66*10**-6*(H_sig/b+0.5)*(L/b)**3/C_Delta+0.0043*(tau-4) #Added resistance at V_K/sqrt(L) = 2
-        R_AW_4 = (Delta)*(0.3*H_sig/b)/(1+2*H_sig/b)*(1.76-tau/6-2*np.tan(beta*pi/180)**3) #V_K/sqrt(L) = 4
-        R_AW_6 = (w*b**3)*(0.158*H_sig/b)/(1+(H_sig/b)*(0.12*beta-21*C_Delta*(5.6-L/b)+7.5*(6-L/b))) #V_K/sqrt(L) = 6
-        R_AWs = np.array([R_AW_2, R_AW_4, R_AW_6])*4.448 #lbf to N conversion
-        
-        R_AWs_interp = interpolate.interp1d([2,4,6], R_AWs, kind='quadratic', fill_value='extrapolate')
-        R_AW = R_AWs_interp([V_K/np.sqrt(L)])
-        
-        n_cg = 0.0104*(H_sig/b+0.084)*tau/4*(5/3-beta/30)*(V_K/np.sqrt(L))**2*L/b/C_Delta #g, at CG
-        n_bow = n_cg*(1+3.8*(L/b-2.25)/(V_K/np.sqrt(L))) #g, at bow
+            R_AWs_interp = interpolate.interp1d([2,4,6], R_AWs, kind='quadratic', fill_value='extrapolate')
+            R_AW = R_AWs_interp([Vk_L])[0]
+
+        elif self.seaway_drag_type == 2: #Fridsma '71 design charts
+            #Check that variables are inside range of applicability (P. R-1495 of Fridsma '71)
+            if C_Delta < 0.3 or C_Delta > 0.9:
+                warnings.warn('C_Delta = {0:.3f}, outside of range of applicability (0.3 <= C_Delta <= 0.9). Results are extrapolations'.format(C_Delta), stacklevel=2)
+            if L/b < 3 or L/b > 6:
+                warnings.warn('L/b = {0:.3f}, outside of range of applicability (3 <= L/b <= 6). Results are extrapolations'.format(L/b), stacklevel=2)
+            if C_Delta/(L/b) < 0.06 or C_Delta/(L/b) > 0.18:
+                warnings.warn('C_Delta/(L/b) = {0:.3f}, outside of range of applicability (0.06 <= C_Delta/(L/b) <= 0.18). Results are extrapolations'.format(C_Delta/(L/b)), stacklevel=2)
+            if tau < 3 or tau > 7:
+                warnings.warn('tau = {0:.3f}, outside of range of applicability (3 <= tau <= 7). Results are extrapolations'.format(tau), stacklevel=2)
+            if beta < 10 or beta > 30:
+                warnings.warn('beta = {0:.3f}, outside of range of applicability (10 <= beta <= 30). Results are extrapolations'.format(beta), stacklevel=2)
+            if H_sig/b > 0.8:
+                warnings.warn('H_sig/b = {0:.3f}, outside of range of applicability (H_sig/b <= 0.8). Results are extrapolations'.format(H_sig/b), stacklevel=2)
+            if Vk_L > 6:
+                warnings.warn('Vk_L = {0:.3f}, outside of range of applicability (Vk_L <= 6). Results are extrapolations'.format(Vk_L), stacklevel=2)
+
+            #Read values from extracted chart points
+            arr_Raw2 = np.genfromtxt('tables\Raw_0.2.csv', delimiter=',', skip_header=1)
+            arr_Raw4 = np.genfromtxt('tables\Raw_0.4.csv', delimiter=',', skip_header=1)
+            arr_Raw6 = np.genfromtxt('tables\Raw_0.6.csv', delimiter=',', skip_header=1)
+
+            arr_V2 = np.genfromtxt('tables\V_0.2.csv', delimiter=',', skip_header=1)
+            arr_V4 = np.genfromtxt('tables\V_0.4.csv', delimiter=',', skip_header=1)
+
+            arr_Raw_V2 = np.genfromtxt('tables\Raw_V_0.2.csv', delimiter=',', skip_header=1)
+            arr_Raw_V4 = np.genfromtxt('tables\Raw_V_0.4.csv', delimiter=',', skip_header=1)
+            arr_Raw_V6 = np.genfromtxt('tables\Raw_V_0.6.csv', delimiter=',', skip_header=1)
+            
+            #Create interpolation functions
+            interp1Type = 'linear'
+            interp2Type = 'linear'
+
+            Raw2m_interp = interpolate.interp2d(arr_Raw2[:, 1], arr_Raw2[:, 0], arr_Raw2[:, 2], kind=interp2Type)
+            Raw4m_interp = interpolate.interp2d(arr_Raw4[:, 1], arr_Raw4[:, 0], arr_Raw4[:, 2], kind=interp2Type)
+            Raw6m_interp = interpolate.interp2d(arr_Raw6[:, 1], arr_Raw6[:, 0], arr_Raw6[:, 2], kind=interp2Type)
+
+            V2m_interp = interpolate.interp2d(arr_V2[:, 1], arr_V2[:, 0], arr_V2[:, 2], kind=interp2Type)
+            V4m_interp = interpolate.interp2d(arr_V4[:, 1], arr_V4[:, 0], arr_V4[:, 2], kind=interp2Type)
+            V6m_interp = V4m_interp
+
+            RawRaw2m_interp = interpolate.interp1d(arr_Raw_V2[:, 0], arr_Raw_V2[:, 1], kind=interp1Type, fill_value='extrapolate')
+            RawRaw4m_interp = interpolate.interp1d(arr_Raw_V4[:, 0], arr_Raw_V4[:, 1], kind=interp1Type, fill_value='extrapolate')
+            RawRaw6m_interp = interpolate.interp1d(arr_Raw_V6[:, 0], arr_Raw_V6[:, 1], kind=interp1Type, fill_value='extrapolate')
+
+            #Get values following procedure shown in Fridsma 1971 paper
+            VLm = [V2m_interp(beta, tau)[0], V4m_interp(beta, tau)[0], V6m_interp(beta, tau)[0]]
+            Rwbm = [Raw2m_interp(beta, tau)[0], Raw4m_interp(beta, tau)[0], Raw6m_interp(beta, tau)[0]]
+            VVm = Vk_L/VLm
+            RRm = [RawRaw2m_interp(VVm[0]), RawRaw4m_interp(VVm[1]), RawRaw6m_interp(VVm[2])]
+            Rwb = np.multiply(RRm, Rwbm)
+
+            E1 = lambda H_sig: 1 + ((L/b)**2/25 - 1)/(1 + 0.895*(H_sig/b - 0.6)) #V/sqrt(L) = 2
+            E2 = lambda H_sig: 1 + 10*H_sig/b*(C_Delta/(L/b) - 0.12) #V/sqrt(L) = 4
+            E3 = lambda H_sig: 1 + 2*H_sig/b*(0.9*(C_Delta-0.6)-0.7*(C_Delta-0.6)**2) #V/sqrt(L) = 6
+            E_interp = lambda H_sig: interpolate.interp1d([2, 4, 6], [E1(H_sig), E2(H_sig), E3(H_sig)], kind=interp1Type, fill_value='extrapolate')
+            E = [E_interp(0.2*b)(Vk_L), E_interp(0.4*b)(Vk_L), E_interp(0.6*b)(Vk_L)]
+
+            Rwb_final = np.multiply(Rwb,E)
+            Rwb_final_interp = interpolate.interp1d([0.2, 0.4, 0.6], Rwb_final, kind=interp1Type, fill_value='extrapolate')
+
+            R_AW = Rwb_final_interp(H_sig/b)*w*b**3
+
+            warnings.warn('Average impact acceleration based on the Fridsma charts is currently not implemented. Using Savitsky & Brown approximation.', stacklevel=2)
+
+        n_cg = 0.0104*(H_sig/b+0.084)*tau/4*(5/3-beta/30)*(Vk_L)**2*L/b/C_Delta #g, at CG
+        n_bow = n_cg*(1+3.8*(L/b-2.25)/(Vk_L)) #g, at bow
         avg_impact_acc = np.array([n_cg, n_bow])
         
         #Update values
         self.avg_impact_acc = avg_impact_acc
-        self.R_AW = R_AW[0]
+        self.R_AW = R_AW*4.448 #lbf to N conversion
