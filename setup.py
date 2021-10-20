@@ -20,12 +20,12 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    packages = ['openplaning']
+    packages = ['openplaning'],
     python_requires=">=3.6",
     install_requires=[
         'numpy',
         'scipy',
         'ndmath',
     ],
-    package_data={'openplaning':['tables/*.csv']}
+    package_data={'openplaning':['tables/*.csv']},
 )
