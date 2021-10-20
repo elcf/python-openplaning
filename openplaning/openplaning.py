@@ -3,6 +3,7 @@ from scipy import interpolate, signal
 from scipy.special import gamma
 import ndmath
 import warnings
+import pkg_resources
 
 class PlaningBoat():
     """Prismatic planing craft
@@ -924,17 +925,29 @@ class PlaningBoat():
             if Vk_L > 6:
                 warnings.warn('Vk_L = {0:.3f}, outside of range of applicability (Vk_L <= 6). Results are extrapolations'.format(Vk_L), stacklevel=2)
 
+            #Get data tables (required for when package is distributed)
+            Raw2_tab = pkg_resources.resource_filename(__name__, 'tables\Raw_0.2.csv')
+            Raw4_tab = pkg_resources.resource_filename(__name__, 'tables\Raw_0.4.csv')
+            Raw6_tab = pkg_resources.resource_filename(__name__, 'tables\Raw_0.6.csv')
+
+            V2_tab = pkg_resources.resource_filename(__name__, 'tables\V_0.2.csv')
+            V4_tab = pkg_resources.resource_filename(__name__, 'tables\V_0.4.csv')
+            
+            RawV2_tab = pkg_resources.resource_filename(__name__, 'tables\Raw_V_0.2.csv')
+            RawV4_tab = pkg_resources.resource_filename(__name__, 'tables\Raw_V_0.4.csv')
+            RawV6_tab = pkg_resources.resource_filename(__name__, 'tables\Raw_V_0.6.csv')
+
             #Read values from extracted chart points
-            arr_Raw2 = np.genfromtxt('tables\Raw_0.2.csv', delimiter=',', skip_header=1)
-            arr_Raw4 = np.genfromtxt('tables\Raw_0.4.csv', delimiter=',', skip_header=1)
-            arr_Raw6 = np.genfromtxt('tables\Raw_0.6.csv', delimiter=',', skip_header=1)
+            arr_Raw2 = np.genfromtxt(Raw2_tab, delimiter=',', skip_header=1)
+            arr_Raw4 = np.genfromtxt(Raw4_tab, delimiter=',', skip_header=1)
+            arr_Raw6 = np.genfromtxt(Raw6_tab, delimiter=',', skip_header=1)
 
-            arr_V2 = np.genfromtxt('tables\V_0.2.csv', delimiter=',', skip_header=1)
-            arr_V4 = np.genfromtxt('tables\V_0.4.csv', delimiter=',', skip_header=1)
+            arr_V2 = np.genfromtxt(V2_tab, delimiter=',', skip_header=1)
+            arr_V4 = np.genfromtxt(V4_tab, delimiter=',', skip_header=1)
 
-            arr_Raw_V2 = np.genfromtxt('tables\Raw_V_0.2.csv', delimiter=',', skip_header=1)
-            arr_Raw_V4 = np.genfromtxt('tables\Raw_V_0.4.csv', delimiter=',', skip_header=1)
-            arr_Raw_V6 = np.genfromtxt('tables\Raw_V_0.6.csv', delimiter=',', skip_header=1)
+            arr_Raw_V2 = np.genfromtxt(RawV2_tab, delimiter=',', skip_header=1)
+            arr_Raw_V4 = np.genfromtxt(RawV4_tab, delimiter=',', skip_header=1)
+            arr_Raw_V6 = np.genfromtxt(RawV6_tab, delimiter=',', skip_header=1)
             
             #Create interpolation functions
             interp1Type = 'linear'
