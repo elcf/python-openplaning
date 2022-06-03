@@ -177,7 +177,7 @@ Contributions and feedback are welcome and greatly appreciated. Feel free to ope
 [MIT](https://choosealicense.com/licenses/mit/)
 
 ## Citing
-This package is scheduled to be presented as a conference paper at the SNAME FAST Conference 2021:
+This package was presented as a conference paper at the SNAME FAST Conference 2021:
 * Castro-Feliciano, E. L., 2021, "OpenPlaning: Open-Source Framework for the Hydrodynamic Design of Planing Hulls," SNAME FAST '21 Conference Proceedings
 
 ## References
