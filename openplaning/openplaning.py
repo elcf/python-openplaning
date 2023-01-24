@@ -170,7 +170,7 @@ class PlaningBoat():
             [''],
             ['LOA', self.length, 'm'],
             ['AHR', self.ahr, 'm, average hull roughness'],
-            ['\u0394C_L/\u0394C_D', self.LD_change, ', roughness induced change of hull lift to change of hull drag ratio'],
+            ['\u0394C_L/\u0394C_D', self.LD_change, 'roughness induced change of hull lift to change of hull drag ratio'],
             [''],
             ['---ATTITUDE---'],
             ['z_wl', self.z_wl, 'm, vertical distance of center of gravity to the calm water line'],
