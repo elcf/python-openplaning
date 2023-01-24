@@ -831,12 +831,13 @@ class PlaningBoat():
             def _func(eta):
                 self.eta_3 = eta[0] 
                 self.eta_5 = eta[1]
-                self.get_forces()
+                self.get_forces() #This needs to run get_geo_lengths() to work
                 return self.net_force[1:3]
             
             temp_eta_3 = self.eta_3
             temp_eta_5 = self.eta_5
             
+            warnings.filterwarnings("ignore", category=UserWarning)
             if diffType == 1:
                 C_full = -ndmath.complexGrad(_func, [temp_eta_3, temp_eta_5])
             elif diffType == 2:
@@ -846,6 +847,7 @@ class PlaningBoat():
             self.eta_3 = temp_eta_3
             self.eta_5 = temp_eta_5
             self.get_forces()
+            warnings.filterwarnings("default", category=UserWarning)
             
             #Conversion deg to rad (degree in denominator)
             C_full[0,1] = C_full[0,1] / (pi/180) # N/rad, C_35
