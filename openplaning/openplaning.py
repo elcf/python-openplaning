@@ -831,7 +831,7 @@ class PlaningBoat():
             def _func(eta):
                 self.eta_3 = eta[0] 
                 self.eta_5 = eta[1]
-                self.get_forces()
+                self.get_forces(runGeoLengths)
                 return self.net_force[1:3]
             
             temp_eta_3 = self.eta_3
@@ -845,7 +845,7 @@ class PlaningBoat():
             #Reset values
             self.eta_3 = temp_eta_3
             self.eta_5 = temp_eta_5
-            self.get_forces()
+            self.get_forces(runGeoLengths)
             
             #Conversion deg to rad (degree in denominator)
             C_full[0,1] = C_full[0,1] / (pi/180) # N/rad, C_35
