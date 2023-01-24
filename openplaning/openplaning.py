@@ -557,27 +557,27 @@ class PlaningBoat():
                 deltaC_f = (44*((AHR/(lambda_W*b))**(1/3) - 10*Rn**(-1/3)) + 0.125)/10**3
 
                 #Frictional force due to roughness only
-                deltaR_f = 0.5 * rho * deltaC_f * S * U**2                
+                deltaR_f = 0.5 * rho * deltaC_f * S * U**2
             #<<< Skin friction section <<<
  
             #>>> Hydrodynamic section >>>
             #Change of lift based on ITTC '78 report on propeller tests (P. 274)
             deltaF_N = deltaR_f * (LD_change*np.cos(pi/180*(tau + eta_5)) + np.sin(pi/180*(tau + eta_5))) / (LD_change*np.sin(pi/180*(tau + eta_5)) - np.cos(pi/180*(tau + eta_5)))
-
+            
             #Beam Froude number
             Fn_B = U/np.sqrt(g*b)
 
             #Horizontal force
-            F_x = deltaF_N * np.sin(pi/180*(tau + eta_5))
+            F_x = - deltaF_N * np.sin(pi/180*(tau + eta_5))
 
             #Vertical force (lift)
-            F_z = deltaF_N * np.cos(pi/180*(tau + eta_5))
+            F_z = - deltaF_N * np.cos(pi/180*(tau + eta_5))
 
             #Longitudinal position of the center of pressure, l_p (Eq. 4.41, Doctors 1985)
             l_p = lambda_W * b * (0.75 - 1 / (5.21 * (Fn_B / lambda_W)**2 + 2.39)) #Limits for this is (0.60 < Fn_B < 13.0, lambda < 4.0)
 
             #Moment about CG (Axis consistent with Fig. 9.24 of Faltinsen (P. 366)
-            M_cg = - deltaF_N * (lcg - l_p)           
+            M_cg = deltaF_N * (lcg - l_p)           
             #<<< Hydrodynamic section <<<
 
             #Update values
