@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="openplaning",
-    version="0.2.0",
+    version="0.3.0",
     author="Esteban L. Castro-Feliciano",
     author_email="ecastro@crown-hydro.com",
     description="Hydrodynamic evaluation of planing hulls based on the Savitsky empirical methods.",
