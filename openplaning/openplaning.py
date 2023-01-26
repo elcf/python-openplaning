@@ -382,7 +382,7 @@ class PlaningBoat():
 
         Methods:
             get_hydrodynamic_force(): This function follows Savitsky 1964 and Faltinsen 2005 in calculating the vessel's hydrodynamic forces and moment.
-            get_skin_friction(): This function outputs the frictional force of the vessel using ITTC 1957 and the Bowden and Davison 1974 roughness coefficient.
+            get_skin_friction(): This function outputs the frictional force of the vessel using ITTC 1957 and the Townsin 1985 roughness allowance.
             get_lift_change(): This function estimates the lift change due to roughness wr.r.t. global coordinates.
             get_air_resistance(): This function estimates the air drag. It assumes a square shape projected area with a shape coefficient.
             get_flap_force(): This function outputs the flap forces w.r.t. global coordinates (Savitsky & Brown 1976). Horz: Positive Aft, Vert: Positive Up, Moment: Positive CCW.
@@ -470,7 +470,7 @@ class PlaningBoat():
             self.hydrodynamic_force = np.array([F_x, F_z, M_cg])
             
         def get_skin_friction():
-            """This function outputs the frictional force of the vessel using ITTC 1957 and the Bowden and Davison 1974 roughness coefficient.
+            """This function outputs the frictional force of the vessel using ITTC 1957 and the Townsin 1985 roughness allowance.
             """
             #Surface area of the dry-chine region
             S1 = x_s * b / (2 * np.cos(pi/180*beta)) 
@@ -503,7 +503,7 @@ class PlaningBoat():
                 #'Friction coefficient' ITTC 1957
                 C_f = 0.075/(np.log10(Rn) - 2)**2
 
-                #Additional 'friction coefficient' due to skin friction, Bowden and Davison (1974)
+                #Additional 'friction coefficient' due to skin friction, Townsin (1985) roughness allowance
                 deltaC_f = (44*((AHR/(lambda_W*b))**(1/3) - 10*Rn**(-1/3)) + 0.125)/10**3
 
                 #Frictional force
