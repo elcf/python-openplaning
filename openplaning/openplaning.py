@@ -22,6 +22,7 @@ class PlaningBoat():
         length (float): Vessel LOA for seaway behavior estimates (m). Defaults to None. It is an input to :class:`PlaningBoat`.
         H_sig (float): Significant wave heigth in an irregular sea state (m). Defaults to None. It is an input to :class:`PlaningBoat`.
         ahr (float): Average hull roughness (m). Defaults to 150*10**-6. It is an input to :class:`PlaningBoat`.
+        LD_change (float): Roughness induced change of hull lift to change of hull drag ratio (dimensionless). Defaults to 0, but ITTC '78 approximates a value of -1.1 for propellers. It is an input to :class:`PlaningBoat`.
         Lf (float): Flap chord (m). Defaults to 0. It is an input to :class:`PlaningBoat`.
         sigma (float): Flap span-beam ratio (dimensionless). Defaults to 0. It is an input to :class:`PlaningBoat`.
         delta (float): Flap deflection (deg). Defaults to 0. It is an input to :class:`PlaningBoat`.
@@ -47,6 +48,7 @@ class PlaningBoat():
         z_max (float): Maximum pressure coordinate coefficient, z_max/Ut (dimensionless). It is updated when running :meth:`get_geo_lengths`.
         hydrodynamic_force ((3,) ndarray): Hydrodynamic force (N, N, N*m). [F_x, F_z, M_cg] with x, y, rot directions in intertial coordinates. It is updated when running :meth:`get_forces`.
         skin_friction ((3,) ndarray): Skin friction force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
+        lift_change ((3,) ndarray): Lift change due to roughness (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
         air_resistance ((3,) ndarray): Air resistance force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
         flap_force ((3,) ndarray): Flap resultant force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
         thrust_force ((3,) ndarray): Thrust resultant force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
@@ -60,7 +62,7 @@ class PlaningBoat():
         R_AW (float): Added resistance in waves (N). It is updated when running :meth:`get_seaway_behavior`.
     """
     
-    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length=None, H_sig=None, ahr=150e-6, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1, seaway_drag_type=1):
+    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length=None, H_sig=None, ahr=150e-6, LD_change=0, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1, seaway_drag_type=1):
         """Initialize attributes for PlaningBoat
         
         Args:
@@ -77,6 +79,7 @@ class PlaningBoat():
             length (float, optional): Vessel LOA for seaway behavior estimates (m). Defaults to None.
             H_sig (float, optional): Significant wave heigth in an irregular sea state (m). Defaults to None.
             ahr (float, optional): Average hull roughness (m). Defaults to 150*10**-6.
+            LD_change (float, optional): Roughness induced change of hull lift to change of hull drag ratio (dimensionless). Defaults to 0.
             Lf (float, optional): Flap chord (m). Defaults to 0.
             sigma (float, optional): Flap span-beam ratio (dimensionless). Defaults to 0.
             delta (float, optional): Flap deflection (deg). Defaults to 0.
@@ -108,6 +111,7 @@ class PlaningBoat():
         self.length = length
         self.H_sig = H_sig
         self.ahr = ahr
+        self.LD_change = LD_change
         self.Lf = Lf
         self.sigma = sigma
         self.delta = delta
@@ -166,6 +170,7 @@ class PlaningBoat():
             [''],
             ['LOA', self.length, 'm'],
             ['AHR', self.ahr, 'm, average hull roughness'],
+            ['\u0394C_L/\u0394C_D', self.LD_change, 'roughness induced change of hull lift to change of hull drag ratio'],
             [''],
             ['---ATTITUDE---'],
             ['z_wl', self.z_wl, 'm, vertical distance of center of gravity to the calm water line'],
@@ -211,6 +216,7 @@ class PlaningBoat():
             ['---FORCES [F_x (N, +aft), F_z (N, +up), M_cg (N*m, +pitch up)]---'],
             ['Hydrodynamic Force', self.hydrodynamic_force, ''],
             ['Skin Friction', self.skin_friction, ''],
+            ['Roughness Lift Change', self.lift_change, ''],
             ['Air Resistance', self.air_resistance, ''],
             ['Flap Force', self.flap_force, ''],
             ['Net Force', self.net_force, ''],
@@ -365,6 +371,7 @@ class PlaningBoat():
 
         - :attr:`hydrodynamic_force`
         - :attr:`skin_friction`
+        - :attr:`lift_change`
         - :attr:`air_resistance`
         - :attr:`flap_force`
         - :attr:`thrust_force`
@@ -376,6 +383,7 @@ class PlaningBoat():
         Methods:
             get_hydrodynamic_force(): This function follows Savitsky 1964 and Faltinsen 2005 in calculating the vessel's hydrodynamic forces and moment.
             get_skin_friction(): This function outputs the frictional force of the vessel using ITTC 1957 and the Townsin 1985 roughness allowance.
+            get_lift_change(): This function estimates the lift change due to roughness wr.r.t. global coordinates.
             get_air_resistance(): This function estimates the air drag. It assumes a square shape projected area with a shape coefficient.
             get_flap_force(): This function outputs the flap forces w.r.t. global coordinates (Savitsky & Brown 1976). Horz: Positive Aft, Vert: Positive Up, Moment: Positive CCW.
             sum_forces(): This function gets the sum of forces and moments, and consequently the required net thrust. The coordinates are positive aft, positive up, and positive counterclockwise.
@@ -389,6 +397,7 @@ class PlaningBoat():
         rho = self.rho
         nu = self.nu
         AHR = self.ahr
+        LD_change = self.LD_change
         W = self.weight
         epsilon = self.epsilon
         vT = self.vT
@@ -478,7 +487,14 @@ class PlaningBoat():
                 F_z = 0
                 M_cg = 0
             else:
-                #Mean bottom fluid velocity, Savitsky 1964 - Hadler's empirical formula
+                #Beam Froude number
+                Fn_B = U/np.sqrt(g*b)
+                
+                #Warnings
+                if Fn_B < 1.0 or Fn_B > 13:
+                    warnings.warn('Beam Froude number = {0:.3f}, outside of range of applicability (1.0 <= U/sqrt(g*b) <= 13.00) for average bottom velocity estimate. Results are extrapolations.'.format(Fn_B), stacklevel=2)
+
+                #Mean bottom fluid velocity, Savitsky 1964 - derived to include deadrise effect
                 V_m = U * np.sqrt(1 - (0.012 * tau**1.1 * np.sqrt(lambda_W) - 0.0065 * beta * (0.012 * np.sqrt(lambda_W) * tau**1.1)**0.6) / (lambda_W * np.cos(tau * pi/180)))
 
                 #Reynolds number (with bottom fluid velocity)
@@ -507,6 +523,65 @@ class PlaningBoat():
                 
             #Update values
             self.skin_friction = np.array([F_x, F_z, M_cg])
+        
+        def get_lift_change():
+            """This function estimates the lift change due to roughness wr.r.t. global coordinates.
+            """
+            if LD_change == 0:
+                self.lift_change = np.array([0, 0, 0])
+                return
+
+            #Note: This method currently re-calculates some components from get_hydrodynamic_forces and get_skin_friction. Warnings are not included here since they should already show up in their appropriate functions.
+
+            #>>> Skin friction section >>>
+            #Surface area of the dry-chine region
+            S1 = x_s * b / (2 * np.cos(pi/180*beta)) 
+            if L_K < x_s:
+                S1 = S1 * (L_K / x_s)**2
+
+            #Surface area of the wetted-chine region
+            S2 = b * L_C / np.cos(pi/180*beta) 
+
+            #Total surface area
+            S = S1 + S2 
+            if S == 0: 
+                deltaR_f = 0
+            else:
+                #Mean bottom fluid velocity, Savitsky 1964 - derived to include deadrise effects
+                V_m = U * np.sqrt(1 - (0.012 * tau**1.1 * np.sqrt(lambda_W) - 0.0065 * beta * (0.012 * np.sqrt(lambda_W) * tau**1.1)**0.6) / (lambda_W * np.cos(tau * pi/180)))
+
+                #Reynolds number (with bottom fluid velocity)
+                Rn = V_m * lambda_W * b / nu
+
+                #Additional 'friction coefficient' due to skin friction, Bowden and Davison (1974)
+                deltaC_f = (44*((AHR/(lambda_W*b))**(1/3) - 10*Rn**(-1/3)) + 0.125)/10**3
+
+                #Frictional force due to roughness only
+                deltaR_f = 0.5 * rho * deltaC_f * S * U**2
+            #<<< Skin friction section <<<
+ 
+            #>>> Hydrodynamic section >>>
+            #Change of lift based on ITTC '78 report on propeller tests (P. 274)
+            deltaF_N = deltaR_f * (LD_change*np.cos(pi/180*(tau + eta_5)) + np.sin(pi/180*(tau + eta_5))) / (LD_change*np.sin(pi/180*(tau + eta_5)) - np.cos(pi/180*(tau + eta_5)))
+            
+            #Beam Froude number
+            Fn_B = U/np.sqrt(g*b)
+
+            #Horizontal force
+            F_x = - deltaF_N * np.sin(pi/180*(tau + eta_5))
+
+            #Vertical force (lift)
+            F_z = - deltaF_N * np.cos(pi/180*(tau + eta_5))
+
+            #Longitudinal position of the center of pressure, l_p (Eq. 4.41, Doctors 1985)
+            l_p = lambda_W * b * (0.75 - 1 / (5.21 * (Fn_B / lambda_W)**2 + 2.39)) #Limits for this is (0.60 < Fn_B < 13.0, lambda < 4.0)
+
+            #Moment about CG (Axis consistent with Fig. 9.24 of Faltinsen (P. 366)
+            M_cg = deltaF_N * (lcg - l_p)           
+            #<<< Hydrodynamic section <<<
+
+            #Update values
+            self.lift_change = np.array([F_x, F_z, M_cg])
                 
         def get_air_resistance():
             """This function estimates the air drag. It assumes a square shape projected area with a shape coefficient.
@@ -574,11 +649,12 @@ class PlaningBoat():
             #Call all force functions-------
             get_hydrodynamic_force()
             get_skin_friction()
+            get_lift_change()
             get_air_resistance()
             get_flap_force()
             #-------------------------------
             
-            forcesMatrix = np.column_stack((self.gravity_force, self.hydrodynamic_force, self.skin_friction, self.air_resistance, self.flap_force)) #Forces and moments
+            forcesMatrix = np.column_stack((self.gravity_force, self.hydrodynamic_force, self.skin_friction, self.lift_change, self.air_resistance, self.flap_force)) #Forces and moments
             F_sum = np.sum(forcesMatrix, axis=1) #F[0] is x-dir, F[1] is z-dir, and F[2] is moment
 
             #Required thrust and resultant forces
@@ -755,12 +831,13 @@ class PlaningBoat():
             def _func(eta):
                 self.eta_3 = eta[0] 
                 self.eta_5 = eta[1]
-                self.get_forces()
+                self.get_forces() #This needs to run get_geo_lengths() to work
                 return self.net_force[1:3]
             
             temp_eta_3 = self.eta_3
             temp_eta_5 = self.eta_5
             
+            warnings.filterwarnings("ignore", category=UserWarning)
             if diffType == 1:
                 C_full = -ndmath.complexGrad(_func, [temp_eta_3, temp_eta_5])
             elif diffType == 2:
@@ -770,6 +847,7 @@ class PlaningBoat():
             self.eta_3 = temp_eta_3
             self.eta_5 = temp_eta_5
             self.get_forces()
+            warnings.filterwarnings("default", category=UserWarning)
             
             #Conversion deg to rad (degree in denominator)
             C_full[0,1] = C_full[0,1] / (pi/180) # N/rad, C_35
