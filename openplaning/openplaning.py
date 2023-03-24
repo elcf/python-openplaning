@@ -841,7 +841,7 @@ class PlaningBoat():
             if diffType == 1:
                 C_full = -ndmath.complexGrad(_func, [temp_eta_3, temp_eta_5])
             elif diffType == 2:
-                C_full = -ndmath.finiteGrad(_func, [temp_eta_3, temp_eta_5], 10**-6.6)
+                C_full = -ndmath.finiteGrad(_func, [temp_eta_3, temp_eta_5], step)
 
             #Reset values
             self.eta_3 = temp_eta_3
