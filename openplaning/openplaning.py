@@ -614,7 +614,7 @@ class PlaningBoat():
             M_cg = -F_x*momArm
 
             #Update values
-            self.air_resistance = np.array([F_x, F_x, M_cg])
+            self.air_resistance = np.array([F_x, F_z, M_cg])
         
         def get_flap_force():
             """This function outputs the flap forces w.r.t. global coordinates (Savitsky & Brown 1976). Horz: Positive Aft, Vert: Positive Up, Moment: Positive CCW.
