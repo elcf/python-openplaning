@@ -19,7 +19,7 @@ class PlaningBoat():
         epsilon (float): Thrust angle w.r.t. keel, CCW with body-fixed origin at 9 o'clock (deg). It is an input to :class:`PlaningBoat`.
         vT (float): Thrust vertical distance, measured from keel, and positive up (m). It is an input to :class:`PlaningBoat`.
         lT (float): Thrust horizontal distance, measured from stern, and positive forward (m). It is an input to :class:`PlaningBoat`.
-        length (float): Vessel LOA for seaway behavior estimates (m). Defaults to None. It is an input to :class:`PlaningBoat`.
+        loa (float): Vessel LOA for seaway behavior estimates (m). Defaults to None. It is an input to :class:`PlaningBoat`.
         H_sig (float): Significant wave heigth in an irregular sea state (m). Defaults to None. It is an input to :class:`PlaningBoat`.
         ahr (float): Average hull roughness (m). Defaults to 150*10**-6. It is an input to :class:`PlaningBoat`.
         LD_change (float): Roughness induced change of hull lift to change of hull drag ratio (dimensionless). Defaults to 0, but ITTC '78 approximates a value of -1.1 for propellers. It is an input to :class:`PlaningBoat`.
@@ -43,9 +43,13 @@ class PlaningBoat():
         z_max_type (int): 1 = Uses 3rd order polynomial fit, 2 = Uses cubic interpolation from table. This is only used if wetted_lenghts_type == 1. Defaults to 1. It is an input to :class:`PlaningBoat`.
         L_K (float): Keel wetted length (m). It is updated when running :meth:`get_geo_lengths`.
         L_C (float): Chine wetted length (m). It is updated when running :meth:`get_geo_lengths`.
+        L_C2 (float): Chine wetted length with reattached flow (m). It is updated when running :meth:`get_geo_lengths`.
         lambda_W (float): Mean wetted-length to beam ratio, (L_K+L_C)/(2*beam) (dimensionless). It is updated when running :meth:`get_geo_lengths`.
         x_s (float): Distance from keel/water-line intersection to start of wetted chine (m). It is updated when running :meth:`get_geo_lengths`.
+        alpha (float): Angle between spray line and keel, projected to plan view (deg). It is updated when running :meth:`get_geo_lengths`.
         z_max (float): Maximum pressure coordinate coefficient, z_max/Ut (dimensionless). It is updated when running :meth:`get_geo_lengths`.
+        T (float): Transom draft (m). It is updated when running :meth:`get_geo_lengths`.
+        lcp (float): Longitudinal center of pressure, measured from the stern (m). It is updated when running :meth:`get_forces`.
         hydrodynamic_force ((3,) ndarray): Hydrodynamic force (N, N, N*m). [F_x, F_z, M_cg] with x, y, rot directions in intertial coordinates. It is updated when running :meth:`get_forces`.
         skin_friction ((3,) ndarray): Skin friction force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
         lift_change ((3,) ndarray): Lift change due to roughness (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
@@ -62,7 +66,7 @@ class PlaningBoat():
         R_AW (float): Added resistance in waves (N). It is updated when running :meth:`get_seaway_behavior`.
     """
     
-    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length=None, H_sig=None, ahr=150e-6, LD_change=0, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1, seaway_drag_type=1):
+    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, loa=None, H_sig=None, ahr=150e-6, LD_change=0, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1, seaway_drag_type=1):
         """Initialize attributes for PlaningBoat
         
         Args:
@@ -76,7 +80,7 @@ class PlaningBoat():
             epsilon (float): Thrust angle w.r.t. keel, CCW with body-fixed origin at 9 o'clock (deg).
             vT (float): Thrust vertical distance, measured from keel, and positive up (m).
             lT (float): Thrust horizontal distance, measured from stern, and positive forward (m).
-            length (float, optional): Vessel LOA for seaway behavior estimates (m). Defaults to None.
+            loa (float, optional): Vessel LOA for seaway behavior estimates (m). Defaults to None.
             H_sig (float, optional): Significant wave heigth in an irregular sea state (m). Defaults to None.
             ahr (float, optional): Average hull roughness (m). Defaults to 150*10**-6.
             LD_change (float, optional): Roughness induced change of hull lift to change of hull drag ratio (dimensionless). Defaults to 0.
@@ -108,7 +112,7 @@ class PlaningBoat():
         self.epsilon = epsilon 
         self.vT = vT 
         self.lT = lT
-        self.length = length
+        self.loa = loa
         self.H_sig = H_sig
         self.ahr = ahr
         self.LD_change = LD_change
@@ -157,18 +161,18 @@ class PlaningBoat():
             ['Speed', self.speed, 'm/s'],
             ['V_k', self.speed*1.944, 'knot'],
             ['Fn (beam)', self.speed/np.sqrt(self.g*self.beam), ''],
-            ['Fn (volume)', self.speed/np.sqrt(self.g*(self.weight/(self.g*self.rho))**(1/3)), ''],
+            ['Fn (volume)', self.speed/np.sqrt(self.g*(volume)**(1/3)), ''],
             [''],
             ['Weight', self.weight, 'N'],
             ['Mass', self.weight/self.g, 'kg'],
-            ['Volume', self.weight/(self.g*self.rho), 'm\u00B3'],
+            ['Volume', volume, 'm\u00B3'],
             ['Beam', self.beam, 'm'],
             ['LCG', self.lcg, 'm from stern'],
             ['VCG', self.vcg, 'm from keel'],
             ['R_g', self.r_g, 'm'],
             ['Deadrise', self.beta, 'deg'], #'\N{greek small letter beta}'
             [''],
-            ['LOA', self.length, 'm'],
+            ['LOA', self.loa, 'm'],
             ['AHR', self.ahr, 'm, average hull roughness'],
             ['\u0394C_L/\u0394C_D', self.LD_change, 'roughness induced change of hull lift to change of hull drag ratio'],
             [''],
@@ -177,7 +181,6 @@ class PlaningBoat():
             ['tau', self.tau, 'deg, trim angle'],
             ['\u03B7\u2083', self.eta_3, 'deg, additional heave'],
             ['\u03B7\u2085', self.eta_5, 'deg, additional trim'],
-            ['Transom draft', self.L_K*np.sin((self.tau+self.eta_5)*np.pi/180), 'm, draft of keel at transom'],
             [''],
             ['---PROPULSION---'],
             ['Thrust angle', self.epsilon, 'deg w.r.t. keel (CCW with body-fixed origin at 9 o\'clock)'],
@@ -206,12 +209,15 @@ class PlaningBoat():
             ['wetted_lengths_type', self.wetted_lengths_type, '(1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky\'s \'64 approach, 3 = Use Savitsky\'s \'76 approach)'],
             ['z_max_type', self.z_max_type, '(1 = Uses 3rd order polynomial fit (faster, recommended), 2 = Use cubic interpolation)'],
             [''],
-            ['---WETTED LENGTHS---'],
+            ['---RUNNING LENGTHS---'],
             ['L_K', self.L_K, 'm, keel wetted length'],
             ['L_C', self.L_C, 'm, chine wetted length'],
             ['\u03BB', self.lambda_W, 'mean wetted-length to beam ratio (L_K+L_C)/(2*beam)'],
             ['x_s', self.x_s, 'm, distance from keel/water-line intersection to start of wetted chine'],
             ['z_max', self.z_max, 'maximum pressure coordinate coefficient (z_max/Ut)'],
+            ['alpha', self.alpha, 'deg, spray line angle w.r.t. keel in plan view'],
+            ['LCP', self.lcp, 'm,  from stern'],
+            ['T', self.T, 'm, draft of keel at transom'],
             [''],
             ['---FORCES [F_x (N, +aft), F_z (N, +up), M_cg (N*m, +pitch up)]---'],
             ['Hydrodynamic Force', self.hydrodynamic_force, ''],
@@ -268,6 +274,7 @@ class PlaningBoat():
         - :attr:`x_s`
         - :attr:`z_max`
         """
+        U = self.speed
         b = self.beam
         lcg = self.lcg
         vcg = self.vcg
@@ -279,6 +286,7 @@ class PlaningBoat():
         pi = np.pi
         wetted_lengths_type = self.wetted_lengths_type
         z_max_type = self.z_max_type
+        g = self.g
         
         #Keel wetted length, Eq. 9.50 of Faltinsen 2005, page 367
         L_K = lcg + vcg / np.tan(pi/180*(tau + eta_5)) - (z_wl + eta_3) / np.sin(pi/180*(tau + eta_5))
@@ -303,6 +311,7 @@ class PlaningBoat():
 
             #Distance from keel/water-line intersection to start of wetted chine (Eq. 9.10 of Faltinsen)
             x_s = 0.5 * b * np.tan(pi/180*beta) / ((1 + z_max) * (pi/180)*(tau + eta_5))
+            alpha = np.arctan(b/(2*x_s))*180/pi #Angle between spray line and keel (projected to plan view)
             if x_s < 0:
                 x_s = 0
 
@@ -311,7 +320,7 @@ class PlaningBoat():
             if L_C < 0:
                 L_C = 0
                 x_s = L_K
-                warnings.warn('Vessel operating with dry chines (L_C = 0).', stacklevel=2)
+                warnings.warn('Vessel operating without wetted chines (L_C = 0).', stacklevel=2)
 
             #Mean wetted length-to-beam ratio
             lambda_W = (L_K + L_C) / (2 * b)
@@ -319,19 +328,20 @@ class PlaningBoat():
         elif wetted_lengths_type == 2:
             #Eq. 3 of Savitsky '64
             x_s = b/pi*np.tan(pi/180*beta)/np.tan(pi/180*(tau + eta_5))
+            alpha = np.arctan(b/(2*x_s))*180/pi #Angle between spray line and keel (projected to plan view)
+
+            #z_max/Vt coefficient (E. 9.10 of Faltinsen 2005 rearranged)
+            z_max = 0.5 * b * np.tan(pi/180*beta) / (x_s * (pi/180)*(tau + eta_5)) - 1
             
             #Chine wetted length
             L_C = L_K - x_s
             if L_C < 0:
                 L_C = 0
                 x_s = L_K
-                warnings.warn('Vessel operating with dry chines (L_C = 0).', stacklevel=2)
+                warnings.warn('Vessel operating without wetted chines (L_C = 0).', stacklevel=2)
             
             #Mean wetted length-to-beam ratio
             lambda_W = (L_K + L_C)/(2*b)
-
-            #z_max/Vt coefficient (E. 9.10 of Faltinsen 2005 rearranged)
-            z_max = 0.5 * b * np.tan(pi/180*beta) / (x_s * (pi/180)*(tau + eta_5)) - 1
         
         elif wetted_lengths_type == 3:
             #Eq. 12 of Savitsky '76
@@ -341,28 +351,47 @@ class PlaningBoat():
 
             #Eq. 14 of Savitsky '76 
             lambda_C = (lambda_K-w)-0.2*np.exp(-(lambda_K-w)/0.3)
+            L_C = lambda_C*b
+
+            x_s = L_K - L_C
+            alpha = np.arctan(b/(2*x_s))*180/pi #Angle between spray line and keel (projected to plan view)
+
+            #z_max/Vt coefficient (Eq. 9.10 of Faltinsen 2005 rearranged)
+            z_max = 0.5 * b * np.tan(pi/180*beta) / (x_s * (pi/180)*(tau + eta_5)) - 1
+
             if lambda_C < 0:
                 lambda_C = 0
-            L_C = lambda_C*b
+                L_C = 0
+                x_s = 0
+                warnings.warn('Vessel operating without wetted chines (L_C = 0).', stacklevel=2)
 
             #Mean wetted length-to-beam ratio, Eq. 15 of Savitsky '76
             lambda_W = (lambda_K + lambda_C)/2+0.03
-
-            x_s = L_K-L_C
-
-            #z_max/Vt coefficient (E. 9.10 of Faltinsen 2005 rearranged)
-            z_max = 0.5 * b * np.tan(pi/180*beta) / (x_s * (pi/180)*(tau + eta_5)) - 1
         
-        if self.length is not None:
-            if L_K > self.length:
-                warnings.warn('The estimated wetted chine length ({0:.3f}) is larger than the vessel length ({1:.3f}).'.format(L_K, self.length), stacklevel=2)
+        if self.loa is not None:
+            if L_K > self.loa:
+                warnings.warn('The estimated wetted chine length ({0:.3f}) is larger than the vessel overall length ({1:.3f}).'.format(L_K, self.loa), stacklevel=2)
+
+        #Chines-dry planing condition (Eq. 3 of Savitsky '76)
+        Fn_B = U/np.sqrt(g*b) #Beam Froude number
+        chines_dry = Fn_B**2 - (lambda_W - 0.16*np.tan(beta*pi/180)/np.tan(tau*pi/180))/(3*np.sin(tau*pi/180))        
+        if chines_dry >= 0:
+            L_C2 = 0
+        else:
+            L_C2 = L_C - 3*U**2*np.sin(tau*pi/180)/g #Side wetting length (Eq. 1 of Savitsky '76)
+
+        #Transom draft
+        T = L_K*np.sin((tau+eta_5)*pi/180)
         
         #Update values
         self.L_K = L_K
         self.L_C = L_C
+        self.L_C2 = L_C2
         self.lambda_W = lambda_W
         self.x_s = x_s
+        self.alpha = alpha
         self.z_max = z_max
+        self.T = T
     
     def get_forces(self, runGeoLengths=True):
         """This function calls all the force functions to update the respective object attributes.
@@ -427,6 +456,7 @@ class PlaningBoat():
         L_C = self.L_C
         lambda_W = self.lambda_W
         x_s = self.x_s
+        alpha = self.alpha
         z_max = self.z_max
         
         pi = np.pi
@@ -467,15 +497,17 @@ class PlaningBoat():
             M_cg = - F_N * (lcg - l_p)
             
             #Update values
+            self.lcp = l_p
             self.hydrodynamic_force = np.array([F_x, F_z, M_cg])
             
         def get_skin_friction():
             """This function outputs the frictional force of the vessel using ITTC 1957 and the Townsin 1985 roughness allowance.
             """
-            #Surface area of the dry-chine region
-            S1 = x_s * b / (2 * np.cos(pi/180*beta)) 
-            if L_K < x_s:
-                S1 = S1 * (L_K / x_s)**2
+            #Surface area of the non-wetted-chine region
+            S1 = x_s**2 * np.tan(alpha*pi/180) / np.cos(pi/180*beta)
+            # S1 = x_s * b / (2 * np.cos(pi/180*beta)) #This no longer works because x_s is set to L_K when x_s estimate is > L_K
+            # if L_K < x_s: 
+            #     S1 = S1 * (L_K / x_s)**2
 
             #Surface area of the wetted-chine region
             S2 = b * L_C / np.cos(pi/180*beta) 
@@ -534,10 +566,8 @@ class PlaningBoat():
             #Note: This method currently re-calculates some components from get_hydrodynamic_forces and get_skin_friction. Warnings are not included here since they should already show up in their appropriate functions.
 
             #>>> Skin friction section >>>
-            #Surface area of the dry-chine region
-            S1 = x_s * b / (2 * np.cos(pi/180*beta)) 
-            if L_K < x_s:
-                S1 = S1 * (L_K / x_s)**2
+            #Surface area of the non-wetted-chine region
+            S1 = x_s**2 * np.tan(alpha*pi/180) / np.cos(pi/180*beta)
 
             #Surface area of the wetted-chine region
             S2 = b * L_C / np.cos(pi/180*beta) 
@@ -658,16 +688,16 @@ class PlaningBoat():
             F_sum = np.sum(forcesMatrix, axis=1) #F[0] is x-dir, F[1] is z-dir, and F[2] is moment
 
             #Required thrust and resultant forces
-            T = F_sum[0]/np.cos(pi/180*(epsilon+tau+eta_5)); #Magnitude
-            T_z = T*np.sin(pi/180*(epsilon+tau+eta_5)); #Vertical
-            T_cg = T*np.cos(pi/180*epsilon)*(vcg - vT) - T*np.sin(pi/180*epsilon)*(lcg - lT); #Moment about cg
+            thrust = F_sum[0]/np.cos(pi/180*(epsilon+tau+eta_5)); #Magnitude
+            thrust_z = thrust*np.sin(pi/180*(epsilon+tau+eta_5)); #Vertical
+            thrust_cg = thrust*np.cos(pi/180*epsilon)*(vcg - vT) - thrust*np.sin(pi/180*epsilon)*(lcg - lT); #Moment about cg
             
             #Update resultant thurst values
-            self.thrust_force = np.array([-F_sum[0], T_z, T_cg])
+            self.thrust_force = np.array([-F_sum[0], thrust_z, thrust_cg])
             
             #Include resultant thrust forces in sum
-            F_sum[1] = F_sum[1]+T_z
-            F_sum[2] = F_sum[2]+T_cg
+            F_sum[1] = F_sum[1]+thrust_z
+            F_sum[2] = F_sum[2]+thrust_cg
             
             #Update values
             self.net_force = F_sum
@@ -936,9 +966,9 @@ class PlaningBoat():
         if self.H_sig is None:
             self.H_sig = self.beam*0.5 #Arbitrary wave height if no user-defined wave height
             warnings.warn('Significant wave height has not been specified. Using beam*0.5 = {0:.3f} m.'.format(self.H_sig), stacklevel=2)
-        if self.length is None:
-            self.length = self.beam*3
-            warnings.warn('Vessel length has not been specified. Using beam*3 = {0:.3f} m.'.format(self.length), stacklevel=2)
+        if self.loa is None:
+            self.loa = self.beam*3
+            warnings.warn('Vessel overall length has not been specified. Using beam*3 = {0:.3f} m.'.format(self.loa), stacklevel=2)
         H_sig = self.H_sig
         
         W = self.weight
@@ -949,7 +979,7 @@ class PlaningBoat():
         
         Delta_LT = W/9964 #Displacement in long tons
         Delta = Delta_LT*2240 #Displacement in lbf
-        L = self.length*3.281 #Length in ft
+        L = self.loa*3.281 #Length in ft
         b = self.beam*3.281 #Beam in ft
         Vk = self.speed*1.944 #Speed in knots
         Vk_L = Vk/np.sqrt(L) #Vk/sqrt(L)
@@ -968,7 +998,7 @@ class PlaningBoat():
             if P1 < 100 or P1 > 250:
                 warnings.warn('Vessel displacement coefficient = {0:.3f}, outside of range of applicability (100 <= Delta_LT/(0.01*L)^3 <= 250, with units LT/ft^3). Results are extrapolations.'.format(P1), stacklevel=2)
             if P2 < 3 or P2 > 5:
-                warnings.warn('Vessel length/beam = {0:.3f}, outside of range of applicability (3 <= L/b <= 5). Results are extrapolations.'.format(P2), stacklevel=2)
+                warnings.warn('Vessel overall length/beam = {0:.3f}, outside of range of applicability (3 <= L/b <= 5). Results are extrapolations.'.format(P2), stacklevel=2)
             if tau < 3 or tau > 7:
                 warnings.warn('Vessel trim = {0:.3f}, outside of range of applicability (3 deg <= tau <= 7 deg). Results are extrapolations.'.format(tau), stacklevel=2)
             if beta < 10 or beta > 30:
