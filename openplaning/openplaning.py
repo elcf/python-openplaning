@@ -1100,3 +1100,145 @@ class PlaningBoat():
         #Update values
         self.avg_impact_acc = avg_impact_acc
         self.R_AW = R_AW*4.448 #lbf to N conversion
+
+    def get_transverse_dynamics(self, diffType=1, step=10**-7):
+        """UNDER CONSTRUCTION. STILL NEED TO CONFIRM EQUATIONS ARE CORRECT
+        This function evaluates the coupled roll-yaw-sway dynamic stabilty based on Lewandowski '97.
+
+        Adds/updates the following parameters:
+        
+        - :attr:``
+        - :attr:``
+        """
+        U = self.speed
+        b = self.beam
+        L_K = self.L_K
+        L_C = self.L_C
+        L_C2 = self.L_C2
+        lambda_W = self.lambda_W
+        beta = self.beta
+        tau = self.tau
+        lcg = self.lcg
+        vcg = self.vcg
+        T = self.T
+        loa = self.loa
+        lcp = self.lcp
+
+        rho = self.rho
+        g = self.g
+        
+        pi = np.pi
+
+        # ===============================
+        # Static restoring moment
+        # ===============================
+        I_T = b**3/48*(L_K+3*L_C) #Transverse waterplane area moment of inertia
+        vcb = b/6*np.tan(beta*pi/180)*(1/2+L_C/L_K) #Estimated vertical center of bouyancy (Eq. 11 of Lewandowski '96)
+        Delta_s = 1/4*rho*g*b**3*lambda_W**2*np.sin(2*tau*pi/180)*(1+(L_K-L_C)**2/(3*(L_K+L_C)**2)) #Estimated static lift
+
+        #Side wetting correction factor (Appendix of Lewandowski '97)
+        if L_C2 > 0:
+            f_sw = 1 + 0.603*L_C2/(lambda_W*b)
+        else:
+            f_sw = 1                
+        K_phi_s = 0.624*f_sw*(-rho*g*I_T + (vcg-vcb)*Delta_s) #Static restoring moment rate (Appendix of Lewandowski '96)
+
+        # ===============================
+        # Dynamic restoring moment
+        # ===============================
+        def get_dynamic_forces(phi):
+            """This function calculates the dynamic side force, roll moment, and yaw moment as a function of roll angle following Lewandowski '96 & '97
+
+            Args:
+                phi (float): Roll angle (deg)
+            """
+            temp_beta = self.beta
+            temp_b = self.beam
+
+            #Port side
+            beta_ep = beta + phi #Effective deadrise
+            b_ep = b*np.cos(beta_ep*pi/180)/np.cos(beta*pi/180) #Effective beam
+            self.beta = beta_ep
+            self.beam = b_ep
+            self.get_geo_lengths()
+            lambda_port = self.lambda_W
+
+            #Starboard side
+            beta_es = beta - phi 
+            b_es = b*np.cos(beta_es*pi/180)/np.cos(beta*pi/180)
+            self.beta = beta_es
+            self.beam = b_es
+            self.get_geo_lengths()
+            lambda_stb = self.lambda_W
+
+            #Return to normal
+            self.beam = temp_b
+            self.beta = temp_beta
+            self.get_geo_lengths()
+
+            #Dynamic force acting normal to port and starboard surfaces
+            F_dport = 1/2 * 1/2*rho*U**2*b_ep**2 * np.sin(2*tau*pi/180)/np.cos(beta_ep*pi/180)*(pi/4*(1-np.sin(beta_ep*pi/180))*np.cos(tau*pi/180)*lambda_port/(1+lambda_port)+1/3*lambda_port*np.cos(tau*pi/180)*np.sin(2*tau*pi/180)*np.cos(beta_ep*pi/180))
+            F_dstb = 1/2 * 1/2*rho*U**2*b_es**2 * np.sin(2*tau*pi/180)/np.cos(beta_es*pi/180)*(pi/4*(1-np.sin(beta_es*pi/180))*np.cos(tau*pi/180)*lambda_stb/(1+lambda_stb)+1/3*lambda_stb*np.cos(tau*pi/180)*np.sin(2*tau*pi/180)*np.cos(beta_es*pi/180))
+
+            print('F_dport: ' + str(F_dport))
+            print('F_dstb: ' + str(F_dstb))
+            print('Y_phi (original): ' + str((F_dport-F_dstb)*np.sin(self.beta*pi/180)))
+            print('Y_phi (corrected): ' + str((F_dport+F_dstb)*np.cos(self.beta*pi/180)*pi/180+(F_dport-F_dstb)*np.sin(self.beta*pi/180)))
+
+            #Transverse center of pressure
+            cp = 0.8*pi*b/(8*np.cos(beta*pi/180)) #If the math is worked out with b_e and beta_e, cp is identical between port and starboard
+
+            #Projected length of KG on the hull surfaces (perpendicular to hull force)
+            l_vcg = vcg*np.sin(beta*pi/180)
+
+            #Lever arms
+            arm = cp - l_vcg
+
+            #Dynamic roll moment
+            K_d = (F_dport - F_dstb) * arm
+
+            #Dynamic side force
+            Y_d = F_dport*np.sin((beta+phi)*pi/180) - F_dstb*np.sin((beta-phi)*pi/180)
+
+            #Dynamic yaw moment
+            N_d = Y_d*(lcp-lcg)
+
+            return np.array([Y_d, K_d, N_d])
+        
+        phi_star = 0 #Heel angle to calculate derivative at
+        warnings.filterwarnings("ignore", category=UserWarning)
+        if diffType == 1:
+            [Y_phi_d, K_phi_d, N_phi_d] = ndmath.complexGrad(get_dynamic_forces, [phi_star]).squeeze()
+        elif diffType == 2:
+            [Y_phi_d, K_phi_d, N_phi_d] = ndmath.finiteGrad(get_dynamic_forces, [phi_star], step)[0].squeeze()
+        warnings.filterwarnings("default", category=UserWarning)
+
+        # ===============================
+        # Added-mass coefficients
+        # ===============================
+        k_beta = 0.06641 + 0.00716*beta + 0.0003861*beta**2 #Hull added mass function (10 deg <= beta <= 45)
+        h_1 = (vcg-0.3927*b*np.tan(beta*pi/180))*(vcg-0.306*b) #Transfer of axes lever arm
+        Fn_B = U/np.sqrt(g*b) #Beam Froude number
+        lwl = loa*0.9 #Estimate of waterline length based on the models in Brown & Klosinski '94 reports
+
+        Y_vd = -b**2*rho*np.tan(beta*pi/180)*k_beta*(L_K+2*L_C)/12
+        K_vd = 0
+        N_vd = -b**2*rho*np.tan(beta*pi/180)*k_beta*(L_K**2+2*L_K*L_C+3*L_C**2)/48
+        Y_rd = N_vd
+        K_rd = 0
+        N_rd = -b**2*rho*np.tan(beta*pi/180)*k_beta*(L_K**3+2*L_K**2*L_C+2*L_C**2*L_K+4*L_C**3)/120
+        Y_pd = 0
+        K_pd = -0.010237*rho*b**5*lambda_W*(1-np.sin(beta*pi/180))+h_1*Y_vd
+        N_pd = 0
+        Y_v = -0.5*rho*U*b**2*(0.6494*beta**0.6*(T/b)**2)
+        K_v = Y_v*(-vcg+1.5145*b/beta**0.342)
+        N_v = Y_v*(-lcg+12.384*b*(T/b)**0.45/(tau+5.28))
+        Y_r = 0.5*rho*U*b**2*lwl*(55.439*beta**0.6*(T/b)**3)*(0.02754-0.5949*(T/b)/(tau+5.28))
+        K_r = 0
+        N_r = -0.5*rho*U*b**3*lwl*(73.918*beta**0.6*(T/b)**3)*(0.00638-0.08289*(T/b)**2/(tau+5.28)**2)
+        Y_p = 0
+        K_p = -(1-np.sin(beta*pi/180))*(0.029*Fn_B+0.02*lambda_W)*rho*g*b**4*np.sqrt(b/g)+h_1*Y_v
+        N_p = 0
+        Y_phi = Y_phi_d
+        K_phi = K_phi_d + K_phi_s
+        N_phi = N_phi_d
