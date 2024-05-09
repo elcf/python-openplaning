@@ -5,7 +5,7 @@ See the source code at `GitHub <https://github.com/elcf/python-openplaning/blob/
 
 The ``PlaningBoat`` class
 *************************
-.. autoclass:: openplaning.PlaningBoat
+.. autoclass:: openplaning.openplaning.PlaningBoat
    :members:
    :undoc-members:
    :show-inheritance:
