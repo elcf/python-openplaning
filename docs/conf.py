@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../openplaning/'))
 # -- Project information -----------------------------------------------------
 
 project = 'OpenPlaning'
-copyright = '2021, Esteban L. Castro-Feliciano'
+copyright = '2024, Esteban L. Castro-Feliciano'
 author = 'Esteban L. Castro-Feliciano'
 
 # The full version, including alpha/beta/rc tags
