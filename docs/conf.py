@@ -33,6 +33,9 @@ release = '0.4.0'
 import sphinx_rtd_theme
 extensions = ['sphinx.ext.autodoc', 'sphinx_rtd_theme', 'sphinx.ext.viewcode', 'sphinx.ext.napoleon', 'myst_parser']
 
+# Mock external packages that are not installed in the docs build environment
+autodoc_mock_imports = ['numpy', 'scipy', 'ndmath']
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
