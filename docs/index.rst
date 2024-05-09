@@ -10,7 +10,7 @@ Welcome to OpenPlaning's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   README.md
+   readme.rst
    openplaning.rst
 
 
