@@ -207,7 +207,7 @@ This package was presented as a conference paper at the SNAME FAST Conference 20
 * Faltinsen, O. M., 2005, "Planing Vessels," Hydrodynamics of High-Speed Marine Vehicles, Cambridge University Press, New York, p. 342
 * Fridsma, G., 1971, "A Systematic Study of the Rough-Water Performance of Planing Boats (Irregular Waves - Part II)," Tech. Rep. 1495, Stevens Institute of Technology
 * Hadler, J. B., 1966, "The Prediction of Power Performance on Planing Craft," SNAME Trans., 74, pp. 563–610
-* ITTC, 1978, "15th International Towing Tank Conference (Proceedings - Part 1)," Netherlands Ship Model Basin, Wegeningen, pp. 273–277
+* ITTC, 1978, "15th International Towing Tank Conference (Proceedings - Part 1)," Netherlands Ship Model Basin, Wageningen, pp. 273–277
 * Mosaad, M. A., 1986, "Marine Propeller Roughness Penalties," PhD Thesis, University of Newcastle, p. 193
 * Savitsky, D., 1964, "Hydrodynamic Design of Planing Hulls," Mar. Technol., 1(1), pp. 71–94
 * Savitsky, D., and Brown, P. W., 1976, "Procedures for Hydrodynamic Evaluation of Planing Hulls in Smooth and Rough Water," Mar. Technol., 13(4), pp. 381–400
