@@ -43,8 +43,13 @@ Lf = 0.3048 #m, flap chord
 #Seaway
 H_sig = 1.402 #m, significant wave height
 
+#Additional options
+LD_change = 0 #Roughness induced change of hull lift to change of hull drag ratio (dimensionless). Defaults to -1.1 (ITTC '78 foil section value).
+wetted_lengths_type = 3 #1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1.
+roughness_penalty_type = 2 #1 = Use Mosaad's '86 regression, 2 = Use Townsin's '84 regression. Defaults to 1.
+
 #Create boat object
-boat = PlaningBoat(speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length, H_sig, Lf=Lf, sigma=sigma, delta=delta, wetted_lengths_type=3)
+boat = PlaningBoat(speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length, H_sig, LD_change=LD_change, Lf=Lf, sigma=sigma, delta=delta, wetted_lengths_type=wetted_lengths_type, roughness_penalty_type=roughness_penalty_type)
 
 #Calculates the equilibrium trim and heave, and updates boat.tau and boat.z_wl
 boat.get_steady_trim()
@@ -56,8 +61,8 @@ boat.print_description()
 # V_k              25.40808 knot
 # Fn (beam)        1.543154 
 # Fn (volume)      2.001392 
-# V_m              12.96859 m/s, mean bottom fluid speed
-# Rn               2.550542e+08 based on V_m and mean wetted-length
+# V_m              12.96912 m/s, mean bottom fluid speed
+# Rn               2.550646e+08 based on V_m and mean wetted-length
 
 # Weight           827400 N
 # Mass             84371.75 kg
@@ -72,8 +77,8 @@ boat.print_description()
 # AHR              150 10⁻⁶m, average hull roughness
 
 # ---ATTITUDE---
-# z_wl             0.135977 m, vertical distance of center of gravity to the calm water line
-# tau              2.89057 deg, trim angle
+# z_wl             0.1384811 m, vertical distance of center of gravity to the calm water line
+# tau              2.878945 deg, trim angle
 # η₃               0 deg, additional heave
 # η₅               0 deg, additional trim
 
@@ -105,77 +110,77 @@ boat.print_description()
 # z_max_type       1 (1 = Uses 3rd order polynomial fit (faster, recommended), 2 = Use cubic interpolation)
 
 # ---RUNNING GEOMETRY---
-# L_K              28.66959 m, keel wetted length
-# L_C              17.69912 m, chine wetted length
-# λ                3.199427 mean wetted-length to beam ratio (L_K+L_C)/(2*beam)
-# x_s              10.97047 m, distance from keel/water-line intersection to start of wetted chine
-# z_max            0.770724 maximum pressure coordinate coefficient (z_max/Ut)
-# alpha            18.43814 deg, spray line angle w.r.t. keel in plan view
-# LCP              11.05545 m, longitudinal center of pressure from stern
-# T                1.445766 m, draft of keel at transom
+# L_K              28.69256 m, keel wetted length
+# L_C              17.67617 m, chine wetted length
+# λ                3.199428 mean wetted-length to beam ratio (L_K+L_C)/(2*beam)
+# x_s              11.0164 m, distance from keel/water-line intersection to start of wetted chine
+# z_max            0.7704615 maximum pressure coordinate coefficient (z_max/Ut)
+# alpha            18.36643 deg, spray line angle w.r.t. keel in plan view
+# LCP              11.05546 m, longitudinal center of pressure from stern
+# T                1.441111 m, draft of keel at transom
 # wetted_bottom_area 175.5762 m², bottom wetted surface area
 
 # ---ROUGHNESS DRAG PENALTY---
 # roughness_penalty_type 2 (1 = Use Mosaad's 1986 regression, 2 = Use Townsin's '84 regression)
-# ΔC_f             0.2484994 10⁻³ change in friction coefficient
-# ΔL/ΔD            -1.1 roughness induced change of hull lift to change of hull drag ratio
-# ΔC_L             0.8107223 10⁻³ change in lift coefficient
+# ΔC_f             0.2485087 10⁻³ change in friction coefficient
+# ΔL/ΔD            0 roughness induced change of hull lift to change of hull drag ratio
+# ΔC_L             0 10⁻³ change in lift coefficient
 
 # ---FORCES [F_x (N, +aft), F_z (N, +up), M_cg (N*m, +pitch up)]---
 # Hydrodynamic Force =
-# [39595.45 784180.1 302649.8]
+# [39245.86 780400.3 301189.8]
 
 # Skin Friction =
-# [31893.66 -1610.4 -18957.22]
+# [31893.98 -1603.929 -18962.39]
 
 # Roughness Lift Change =
-# [-191.6862 -3796.308 -1465.163]
+# [0 0 0]
 
 # Air Resistance =
 # [0 0 0]
 
 # Flap Force =
-# [1843.665 44933.51 -282227.4]
+# [1840.949 44933.51 -282227.4]
 
 # Net Force =
-# [73141.09 2.557999e-08 2.520974e-07]
+# [72980.79 2.573734e-08 2.535526e-07]
 
 # Resultant Thrust =
-# [-73141.09 3693.099 0]
+# [-72980.79 3670.16 0]
 
 
 # ---THURST & POWER---
-# Thrust Magnitude 73234.27 N
-# Effective Thrust 73141.09 N
-# Eff. Power       955.9541 kW
-# Eff. Horsepower  1281.955 hp
+# Thrust Magnitude 73073.02 N
+# Effective Thrust 72980.79 N
+# Eff. Power       953.859 kW
+# Eff. Horsepower  1279.146 hp
 
 # ---EOM MATRICES---
 # Mass matrix, [kg, kg*m/rad; kg*m, kg*m²/rad] =
-# [[501950.3 68697.46]
-#  [68697.46 2.046579e+07]]
+# [[501800.8 67648.82]
+#  [67648.82 2.046024e+07]]
 
 # Damping matrix, [kg/s, kg*m/(s*rad); kg*m/s, kg*m²/(s*rad)] =
-# [[447643.3 -8184590]
-#  [3081064 2.909537e+07]]
+# [[447299.8 -8182636]
+#  [3078703 2.909537e+07]]
 
 # Restoring matrix, [N/m, N/rad; N, N*m/rad] =
-# [[1323798 -2433736]
-#  [4921643 5.351766e+07]]
+# [[1325673 -2390482]
+#  [4940227 5.375431e+07]]
 
 
 # ---PORPOISING---
 # [[Eigenvalue check result, Est. pitch settling time (s)],
 #  [Savitsky chart result, Critical trim angle (deg)]] =
-# [[0 7.096147]
+# [[0 7.097941]
 #  [0 9.955598]]
 
 
 # ---BEHAVIOR IN WAVES---
 # H_sig            1.402 m, significant wave heigth
-# R_AW             38361.78 N, added resistance in waves
+# R_AW             38406.03 N, added resistance in waves
 # Average impact acceleration [n_cg, n_bow] (g's) =
-# [0.3094715 0.7577334]
+# [0.3082269 0.754686]
 ```
 
 ## Dependencies
