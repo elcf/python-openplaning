@@ -66,7 +66,7 @@ class PlaningBoat():
         R_AW (float): Added resistance in waves (N). It is updated when running :meth:`get_seaway_behavior`.
     """
     
-    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, loa=None, H_sig=None, ahr=150e-6, LD_change=0, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1, seaway_drag_type=1):
+    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, loa=None, H_sig=None, ahr=150e-6, LD_change=0, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1, roughness_penalty_type=1, seaway_drag_type=1):
         """Initialize attributes for PlaningBoat
         
         Args:
@@ -100,6 +100,7 @@ class PlaningBoat():
             g (float, optional): Gravitational acceleration (m/s^2). Defaults to 9.8066.
             wetted_lengths_type (int, optional): 1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1.
             z_max_type (int, optional): 1 = Uses 3rd order polynomial fit, 2 = Uses cubic interpolation from table. This is only used if wetted_lenghts_type == 1. Defaults to 1.
+            roughness_penalty_type (int, optional): 1 = Use Mosaad's '86 regression, 2 = Use Townsin's '84 regression. Defaults to 1.
             seaway_drag_type (int, optional): 1 = Use Savitsky's '76 approximation, 2 = Use Fridsma's '71 designs charts. Defaults to 1.
         """
         self.speed = speed
@@ -138,6 +139,8 @@ class PlaningBoat():
         self.wetted_lengths_type = wetted_lengths_type
         self.z_max_type = z_max_type
 
+        self.roughness_penalty_type = roughness_penalty_type
+
         self.seaway_drag_type = seaway_drag_type
         
     def print_description(self, sigFigs=7, runAllFunctions=True):
@@ -162,6 +165,8 @@ class PlaningBoat():
             ['V_k', self.speed*1.944, 'knot'],
             ['Fn (beam)', self.speed/np.sqrt(self.g*self.beam), ''],
             ['Fn (volume)', self.speed/np.sqrt(self.g*(volume)**(1/3)), ''],
+            ['V_m', self.bottom_fluid_speed, 'm/s, mean bottom fluid speed'],
+            ['Rn', self.bottom_fluid_speed * self.lambda_W * self.beam / self.nu, 'based on V_m and mean wetted-length'],
             [''],
             ['Weight', self.weight, 'N'],
             ['Mass', self.weight/self.g, 'kg'],
@@ -173,8 +178,7 @@ class PlaningBoat():
             ['Deadrise', self.beta, 'deg'], #'\N{greek small letter beta}'
             [''],
             ['LOA', self.loa, 'm'],
-            ['AHR', self.ahr, 'm, average hull roughness'],
-            ['\u0394C_L/\u0394C_D', self.LD_change, 'roughness induced change of hull lift to change of hull drag ratio'],
+            ['AHR', self.ahr*10**6, '10\u207b\u2076m, average hull roughness'],
             [''],
             ['---ATTITUDE---'],
             ['z_wl', self.z_wl, 'm, vertical distance of center of gravity to the calm water line'],
@@ -209,15 +213,22 @@ class PlaningBoat():
             ['wetted_lengths_type', self.wetted_lengths_type, '(1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky\'s \'64 approach, 3 = Use Savitsky\'s \'76 approach)'],
             ['z_max_type', self.z_max_type, '(1 = Uses 3rd order polynomial fit (faster, recommended), 2 = Use cubic interpolation)'],
             [''],
-            ['---RUNNING LENGTHS---'],
+            ['---RUNNING GEOMETRY---'],
             ['L_K', self.L_K, 'm, keel wetted length'],
             ['L_C', self.L_C, 'm, chine wetted length'],
             ['\u03BB', self.lambda_W, 'mean wetted-length to beam ratio (L_K+L_C)/(2*beam)'],
             ['x_s', self.x_s, 'm, distance from keel/water-line intersection to start of wetted chine'],
             ['z_max', self.z_max, 'maximum pressure coordinate coefficient (z_max/Ut)'],
             ['alpha', self.alpha, 'deg, spray line angle w.r.t. keel in plan view'],
-            ['LCP', self.lcp, 'm,  from stern'],
+            ['LCP', self.lcp, 'm, longitudinal center of pressure from stern'],
             ['T', self.T, 'm, draft of keel at transom'],
+            ['wetted_bottom_area', self.wetted_bottom_area, 'm\u00B2, bottom wetted surface area'],
+            [''],
+            ['---ROUGHNESS DRAG PENALTY---'],
+            ['roughness_penalty_type', self.roughness_penalty_type, '(1 = Use Mosaad\'s 1986 regression, 2 = Use Townsin\'s \'84 regression)'],
+            ['\u0394C_f', self.deltaC_f*10**3, '10\u207b\u00b3 change in friction coefficient'],
+            ['\u0394L/\u0394D', self.LD_change, 'roughness induced change of hull lift to change of hull drag ratio'],
+            ['\u0394C_L', self.deltaC_L*10**3, '10\u207b\u00b3 change in lift coefficient'],
             [''],
             ['---FORCES [F_x (N, +aft), F_z (N, +up), M_cg (N*m, +pitch up)]---'],
             ['Hydrodynamic Force', self.hydrodynamic_force, ''],
@@ -398,6 +409,13 @@ class PlaningBoat():
         
         Adds/updates the following attributes:
 
+        - :attr:`C_Lbeta`
+        - :attr:`lcp`
+        - :attr:`wetted_bottom_area`
+        - :attr:`bottom_fluid_speed`
+        - :attr:`C_f`
+        - :attr:`deltaC_f`
+        - :attr:`deltaC_L`
         - :attr:`hydrodynamic_force`
         - :attr:`skin_friction`
         - :attr:`lift_change`
@@ -458,6 +476,8 @@ class PlaningBoat():
         x_s = self.x_s
         alpha = self.alpha
         z_max = self.z_max
+
+        roughness_penalty_type = self.roughness_penalty_type
         
         pi = np.pi
                 
@@ -497,6 +517,7 @@ class PlaningBoat():
             M_cg = - F_N * (lcg - l_p)
             
             #Update values
+            self.C_Lbeta = C_Lbeta
             self.lcp = l_p
             self.hydrodynamic_force = np.array([F_x, F_z, M_cg])
             
@@ -535,8 +556,14 @@ class PlaningBoat():
                 #'Friction coefficient' ITTC 1957
                 C_f = 0.075/(np.log10(Rn) - 2)**2
 
-                #Additional 'friction coefficient' due to skin friction, Townsin (1985) roughness allowance
-                deltaC_f = (44*((AHR/(lambda_W*b))**(1/3) - 10*Rn**(-1/3)) + 0.125)/10**3
+                #Additional 'friction coefficient' due to skin friction
+                if AHR > 0:
+                    if roughness_penalty_type == 1: #Mosaad 1986 roughness allowance
+                        deltaC_f = (6*Rn**0.093*((AHR/(lambda_W*b))**(1/3) - 5.8*Rn**(-1/3)))/10**3
+                    elif roughness_penalty_type == 2: #Townsin 1984 roughness allowance
+                        deltaC_f = (44*((AHR/(lambda_W*b))**(1/3) - 10*Rn**(-1/3)) + 0.125)/10**3
+                    else:
+                        deltaC_f = 0
 
                 #Frictional force
                 R_f = 0.5 * rho * (C_f + deltaC_f) * S * U**2
@@ -554,6 +581,10 @@ class PlaningBoat():
                 M_cg = R_f * (l_f - vcg)
                 
             #Update values
+            self.wetted_bottom_area = S
+            self.bottom_fluid_speed = V_m
+            self.C_f = C_f
+            self.deltaC_f = deltaC_f
             self.skin_friction = np.array([F_x, F_z, M_cg])
         
         def get_lift_change():
@@ -561,41 +592,21 @@ class PlaningBoat():
             """
             if LD_change == 0:
                 self.lift_change = np.array([0, 0, 0])
+                self.deltaC_L = 0
                 return
 
-            #Note: This method currently re-calculates some components from get_hydrodynamic_forces and get_skin_friction. Warnings are not included here since they should already show up in their appropriate functions.
-
-            #>>> Skin friction section >>>
-            #Surface area of the non-wetted-chine region
-            S1 = x_s**2 * np.tan(alpha*pi/180) / np.cos(pi/180*beta)
-
-            #Surface area of the wetted-chine region
-            S2 = b * L_C / np.cos(pi/180*beta) 
-
-            #Total surface area
-            S = S1 + S2 
+            S = self.wetted_bottom_area
             if S == 0: 
                 deltaR_f = 0
             else:
-                #Mean bottom fluid velocity, Savitsky 1964 - derived to include deadrise effects
-                V_m = U * np.sqrt(1 - (0.012 * tau**1.1 * np.sqrt(lambda_W) - 0.0065 * beta * (0.012 * np.sqrt(lambda_W) * tau**1.1)**0.6) / (lambda_W * np.cos(tau * pi/180)))
-
-                #Reynolds number (with bottom fluid velocity)
-                Rn = V_m * lambda_W * b / nu
-
-                #Additional 'friction coefficient' due to skin friction, Bowden and Davison (1974)
-                deltaC_f = (44*((AHR/(lambda_W*b))**(1/3) - 10*Rn**(-1/3)) + 0.125)/10**3
-
                 #Frictional force due to roughness only
-                deltaR_f = 0.5 * rho * deltaC_f * S * U**2
-            #<<< Skin friction section <<<
+                deltaR_f = 0.5 * rho * self.deltaC_f * S * U**2
  
-            #>>> Hydrodynamic section >>>
             #Change of lift based on ITTC '78 report on propeller tests (P. 274)
             deltaF_N = deltaR_f * (LD_change*np.cos(pi/180*(tau + eta_5)) + np.sin(pi/180*(tau + eta_5))) / (LD_change*np.sin(pi/180*(tau + eta_5)) - np.cos(pi/180*(tau + eta_5)))
-            
-            #Beam Froude number
-            Fn_B = U/np.sqrt(g*b)
+
+            #Change in lift coefficient due to roughness
+            deltaC_L = deltaF_N/(0.5 * rho * U**2 * b**2)
 
             #Horizontal force
             F_x = - deltaF_N * np.sin(pi/180*(tau + eta_5))
@@ -603,14 +614,11 @@ class PlaningBoat():
             #Vertical force (lift)
             F_z = - deltaF_N * np.cos(pi/180*(tau + eta_5))
 
-            #Longitudinal position of the center of pressure, l_p (Eq. 4.41, Doctors 1985)
-            l_p = lambda_W * b * (0.75 - 1 / (5.21 * (Fn_B / lambda_W)**2 + 2.39)) #Limits for this is (0.60 < Fn_B < 13.0, lambda < 4.0)
-
             #Moment about CG (Axis consistent with Fig. 9.24 of Faltinsen (P. 366)
-            M_cg = deltaF_N * (lcg - l_p)           
-            #<<< Hydrodynamic section <<<
+            M_cg = deltaF_N * (lcg - self.lcp)           
 
             #Update values
+            self.deltaC_L = deltaC_L
             self.lift_change = np.array([F_x, F_z, M_cg])
                 
         def get_air_resistance():
