@@ -66,7 +66,7 @@ class PlaningBoat():
         R_AW (float): Added resistance in waves (N). It is updated when running :meth:`get_seaway_behavior`.
     """
     
-    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, loa=None, H_sig=None, ahr=150e-6, LD_change=0, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1, roughness_penalty_type=1, seaway_drag_type=1):
+    def __init__(self, speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, loa=None, H_sig=None, ahr=150e-6, LD_change=-1.1, Lf=0, sigma=0, delta=0, l_air=0, h_air=0, b_air=0, C_shape=0, C_D=0.7, z_wl=0, tau=5, rho=1025.87, nu=1.19e-6, rho_air=1.225, g=9.8066, wetted_lengths_type=1, z_max_type=1, roughness_penalty_type=1, seaway_drag_type=1):
         """Initialize attributes for PlaningBoat
         
         Args:
@@ -83,7 +83,7 @@ class PlaningBoat():
             loa (float, optional): Vessel LOA for seaway behavior estimates (m). Defaults to None.
             H_sig (float, optional): Significant wave heigth in an irregular sea state (m). Defaults to None.
             ahr (float, optional): Average hull roughness (m). Defaults to 150*10**-6.
-            LD_change (float, optional): Roughness induced change of hull lift to change of hull drag ratio (dimensionless). Defaults to 0.
+            LD_change (float, optional): Roughness induced change of hull lift to change of hull drag ratio (dimensionless). Defaults to -1.1 (ITTC '78 foil section value).
             Lf (float, optional): Flap chord (m). Defaults to 0.
             sigma (float, optional): Flap span-beam ratio (dimensionless). Defaults to 0.
             delta (float, optional): Flap deflection (deg). Defaults to 0.
