@@ -602,7 +602,7 @@ class PlaningBoat():
                 #Frictional force due to roughness only
                 deltaR_f = 0.5 * rho * self.deltaC_f * S * U**2
  
-            #Change of lift based on ITTC '78 report on propeller tests (P. 274)
+            #Change of hydrodynamic normal force based on ITTC '78 report on propeller tests (P. 274)
             deltaF_N = deltaR_f * (LD_change*np.cos(pi/180*(tau + eta_5)) + np.sin(pi/180*(tau + eta_5))) / (LD_change*np.sin(pi/180*(tau + eta_5)) - np.cos(pi/180*(tau + eta_5)))
 
             #Horizontal force
