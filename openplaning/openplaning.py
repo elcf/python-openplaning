@@ -605,9 +605,6 @@ class PlaningBoat():
             #Change of lift based on ITTC '78 report on propeller tests (P. 274)
             deltaF_N = deltaR_f * (LD_change*np.cos(pi/180*(tau + eta_5)) + np.sin(pi/180*(tau + eta_5))) / (LD_change*np.sin(pi/180*(tau + eta_5)) - np.cos(pi/180*(tau + eta_5)))
 
-            #Change in lift coefficient due to roughness
-            deltaC_L = deltaF_N/(0.5 * rho * U**2 * b**2)
-
             #Horizontal force
             F_x = - deltaF_N * np.sin(pi/180*(tau + eta_5))
 
@@ -615,7 +612,10 @@ class PlaningBoat():
             F_z = - deltaF_N * np.cos(pi/180*(tau + eta_5))
 
             #Moment about CG (Axis consistent with Fig. 9.24 of Faltinsen (P. 366)
-            M_cg = deltaF_N * (lcg - self.lcp)           
+            M_cg = deltaF_N * (lcg - self.lcp)          
+
+            #Change in lift coefficient due to roughness
+            deltaC_L = F_z/(0.5 * rho * U**2 * b**2) 
 
             #Update values
             self.deltaC_L = deltaC_L
