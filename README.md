@@ -115,6 +115,7 @@ z_max_type       1 (1 = Uses 3rd order polynomial fit (faster, recommended), 2 =
 ---RUNNING GEOMETRY---
 L_K              28.69256 m, keel wetted length
 L_C              17.67617 m, chine wetted length
+L_C2             15.05145 m, side chine wetted length
 λ                3.199428 mean wetted-length to beam ratio (L_K+L_C)/(2*beam)
 x_s              11.0164 m, distance from keel/water-line intersection to start of wetted chine
 z_max            0.7704615 maximum pressure coordinate coefficient (z_max/Ut)
