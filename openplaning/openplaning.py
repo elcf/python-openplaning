@@ -43,7 +43,7 @@ class PlaningBoat():
         z_max_type (int): 1 = Uses 3rd order polynomial fit, 2 = Uses cubic interpolation from table. This is only used if wetted_lenghts_type == 1. Defaults to 1. It is an input to :class:`PlaningBoat`.
         L_K (float): Keel wetted length (m). It is updated when running :meth:`get_geo_lengths`.
         L_C (float): Chine wetted length (m). It is updated when running :meth:`get_geo_lengths`.
-        L_C2 (float): Chine wetted length with reattached flow (m). It is updated when running :meth:`get_geo_lengths`.
+        L_C2 (float): Side chine wetted length with reattached flow (m). It is updated when running :meth:`get_geo_lengths`.
         lambda_W (float): Mean wetted-length to beam ratio, (L_K+L_C)/(2*beam) (dimensionless). It is updated when running :meth:`get_geo_lengths`.
         x_s (float): Distance from keel/water-line intersection to start of wetted chine (m). It is updated when running :meth:`get_geo_lengths`.
         alpha (float): Angle between spray line and keel, projected to plan view (deg). It is updated when running :meth:`get_geo_lengths`.
@@ -216,6 +216,7 @@ class PlaningBoat():
             ['---RUNNING GEOMETRY---'],
             ['L_K', self.L_K, 'm, keel wetted length'],
             ['L_C', self.L_C, 'm, chine wetted length'],
+            ['L_C2', self.L_C2, 'm, side chine wetted length'],
             ['\u03BB', self.lambda_W, 'mean wetted-length to beam ratio (L_K+L_C)/(2*beam)'],
             ['x_s', self.x_s, 'm, distance from keel/water-line intersection to start of wetted chine'],
             ['z_max', self.z_max, 'maximum pressure coordinate coefficient (z_max/Ut)'],
