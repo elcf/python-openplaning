@@ -239,7 +239,6 @@ class PlaningBoat():
             ['Flap Force', self.flap_force, ''],
             ['Net Force', self.net_force, ''],
             ['Resultant Thrust', self.thrust_force, ''],
-            [''],
             ['---THURST & POWER---'],
             ['Thrust Magnitude', np.sqrt(self.thrust_force[0]**2+self.thrust_force[1]**2), 'N'],
             ['Effective Thrust', -self.thrust_force[0], 'N'],
@@ -250,10 +249,8 @@ class PlaningBoat():
             ['Mass matrix, [kg, kg*m/rad; kg*m, kg*m\u00B2/rad]', self.mass_matrix, ''],
             ['Damping matrix, [kg/s, kg*m/(s*rad); kg*m/s, kg*m\u00B2/(s*rad)]', self.damping_matrix, ''],
             ['Restoring matrix, [N/m, N/rad; N, N*m/rad]', self.restoring_matrix, ''],
-            [''],
             ['---PORPOISING---'],
             ['[[Eigenvalue check result, Est. pitch settling time (s)],\n [Savitsky chart result, Critical trim angle (deg)]]', np.array(self.porpoising), ''],
-            [''],
             ['---BEHAVIOR IN WAVES---'],
             ['H_sig', self.H_sig, 'm, significant wave heigth'],
             ['R_AW', self.R_AW, 'N, added resistance in waves'],
@@ -264,7 +261,7 @@ class PlaningBoat():
         for row in table:
             if len(row)==3:
                 if row[1] is None:
-                    print('{desc:<{cL0}} {val:<{cL1}} {unit:<{cL2}}'.format(desc=row[0], val=row[1], unit='None', cL0='', cL1=cLens[1], cL2=cLens[2]))
+                    print('{desc:<{cL0}} {val:<{cL1}} {unit:<{cL2}}'.format(desc=row[0], val='None', unit=row[2], cL0=cLens[0], cL1=cLens[1], cL2=cLens[2]))
                 elif isinstance(row[1], (list,np.ndarray)):
                     print(row[0]+' =')
                     with np.printoptions(formatter={'float': f'{{:.{sigFigs}g}}'.format}):
