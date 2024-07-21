@@ -44,13 +44,20 @@ class PlaningBoat():
         L_K (float): Keel wetted length (m). It is updated when running :meth:`get_geo_lengths`.
         L_C (float): Chine wetted length (m). It is updated when running :meth:`get_geo_lengths`.
         L_C2 (float): Side chine wetted length with reattached flow (m). It is updated when running :meth:`get_geo_lengths`.
+        wetted_bottom_area (float): Bottom wetted surface area (m^2). It is updated when running :meth:`get_geo_lengths`.
         lambda_W (float): Mean wetted-length to beam ratio, (L_K+L_C)/(2*beam) (dimensionless). It is updated when running :meth:`get_geo_lengths`.
         x_s (float): Distance from keel/water-line intersection to start of wetted chine (m). It is updated when running :meth:`get_geo_lengths`.
         alpha (float): Angle between spray line and keel, projected to plan view (deg). It is updated when running :meth:`get_geo_lengths`.
         z_max (float): Maximum pressure coordinate coefficient, z_max/Ut (dimensionless). It is updated when running :meth:`get_geo_lengths`.
         T (float): Transom draft (m). It is updated when running :meth:`get_geo_lengths`.
         lcp (float): Longitudinal center of pressure, measured from the stern (m). It is updated when running :meth:`get_forces`.
+        roughness_penalty_type (int): 1 = Use Mosaad's '86 regression, 2 = Use Townsin's '84 regression. Defaults to 1. It is an input to :class:`PlaningBoat`.
+        C_Lbeta (float): Lift coefficient with deadrise. It is updated when running :meth:`get_forces`.
+        deltaC_L (float): Change in hydrodynamic lift coefficient due to roughness, excluding lift change due to roughness. It is updated when running :meth:`get_forces`.
         hydrodynamic_force ((3,) ndarray): Hydrodynamic force (N, N, N*m). [F_x, F_z, M_cg] with x, y, rot directions in intertial coordinates. It is updated when running :meth:`get_forces`.
+        bottom_fluid_speed (float): Mean bottom fluid speed (m/s). It is updated when running :meth:`get_forces`.
+        C_f (float): Friction coefficient, smooth case. It is updated when running :meth:`get_forces`.
+        deltaC_f (float): Change in friction coefficient due to roughness. It is updated when running :meth:`get_forces`.
         skin_friction ((3,) ndarray): Skin friction force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
         lift_change ((3,) ndarray): Lift change due to roughness (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
         air_resistance ((3,) ndarray): Air resistance force (N, N, N*m). [F_x, F_z, M_cg]. It is updated when running :meth:`get_forces`.
@@ -226,7 +233,7 @@ class PlaningBoat():
             ['wetted_bottom_area', self.wetted_bottom_area, 'm\u00B2, bottom wetted surface area'],
             [''],
             ['---ROUGHNESS DRAG PENALTY---'],
-            ['roughness_penalty_type', self.roughness_penalty_type, '(1 = Use Mosaad\'s 1986 regression, 2 = Use Townsin\'s \'84 regression)'],
+            ['roughness_penalty_type', self.roughness_penalty_type, '(1 = Use Mosaad\'s \'86 regression, 2 = Use Townsin\'s \'84 regression)'],
             ['\u0394C_f', self.deltaC_f*10**3, '10\u207b\u00b3 change in friction coefficient'],
             ['\u0394L/\u0394D', self.LD_change, 'roughness induced change of hull lift to change of hull drag ratio'],
             ['\u0394C_L', self.deltaC_L*10**3, '10\u207b\u00b3 change in lift coefficient'],
