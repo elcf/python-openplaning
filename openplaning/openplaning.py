@@ -563,8 +563,8 @@ class PlaningBoat():
                         deltaC_f = (6*Rn**0.093*((AHR/(lambda_W*b))**(1/3) - 5.8*Rn**(-1/3)))/10**3
                     elif roughness_penalty_type == 2: #Townsin 1984 roughness allowance
                         deltaC_f = (44*((AHR/(lambda_W*b))**(1/3) - 10*Rn**(-1/3)) + 0.125)/10**3
-                    else:
-                        deltaC_f = 0
+                else:
+                    deltaC_f = 0
 
                 #Frictional force
                 R_f = 0.5 * rho * (C_f + deltaC_f) * S * U**2
