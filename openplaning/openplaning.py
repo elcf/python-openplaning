@@ -615,7 +615,7 @@ class PlaningBoat():
             #Moment about CG (Axis consistent with Fig. 9.24 of Faltinsen (P. 366)
             M_cg = deltaF_N * (lcg - self.lcp)          
 
-            #Change in lift coefficient due to roughness
+            #Change in hydrodynamic lift coefficient due to roughness (Note: Does not include lift change due to roughness)
             deltaC_L = F_z/(0.5 * rho * U**2 * b**2) 
 
             #Update values
