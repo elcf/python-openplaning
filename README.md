@@ -44,12 +44,11 @@ Lf = 0.3048 #m, flap chord
 H_sig = 1.402 #m, significant wave height
 
 #Additional options
-LD_change = 0 #Roughness induced change of hull lift to change of hull drag ratio (dimensionless). Defaults to -1.1 (ITTC '78 foil section value).
 wetted_lengths_type = 3 #1 = Use Faltinsen 2005 wave rise approximation, 2 = Use Savitsky's '64 approach, 3 = Use Savitsky's '76 approach. Defaults to 1.
 roughness_penalty_type = 2 #1 = Use Mosaad's '86 regression, 2 = Use Townsin's '84 regression. Defaults to 1.
 
 #Create boat object
-boat = PlaningBoat(speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length, H_sig, LD_change=LD_change, Lf=Lf, sigma=sigma, delta=delta, wetted_lengths_type=wetted_lengths_type, roughness_penalty_type=roughness_penalty_type)
+boat = PlaningBoat(speed, weight, beam, lcg, vcg, r_g, beta, epsilon, vT, lT, length, H_sig, Lf=Lf, sigma=sigma, delta=delta, wetted_lengths_type=wetted_lengths_type, roughness_penalty_type=roughness_penalty_type)
 
 #Calculates the equilibrium trim and heave, and updates boat.tau and boat.z_wl
 boat.get_steady_trim()
@@ -125,9 +124,9 @@ T                1.441111 m, draft of keel at transom
 wetted_bottom_area 175.5762 m², bottom wetted surface area
 
 ---ROUGHNESS DRAG PENALTY---
-roughness_penalty_type 2 (1 = Use Mosaad's 1986 regression, 2 = Use Townsin's '84 regression)
+roughness_penalty_type 2 (1 = Use Mosaad's '86 regression, 2 = Use Townsin's '84 regression)
 ΔC_f             0.2485087 10⁻³ change in friction coefficient
-ΔL/ΔD            0 roughness induced change of hull lift to change of hull drag ratio
+ΔL/ΔD            None roughness induced change of hull lift to change of hull drag ratio
 ΔC_L             0 10⁻³ change in lift coefficient
 
 ---FORCES [F_x (N, +aft), F_z (N, +up), M_cg (N*m, +pitch up)]---
@@ -152,7 +151,6 @@ Net Force =
 Resultant Thrust =
 [-72980.79 3670.16 0]
 
-
 ---THURST & POWER---
 Thrust Magnitude 73073.02 N
 Effective Thrust 72980.79 N
@@ -172,13 +170,11 @@ Restoring matrix, [N/m, N/rad; N, N*m/rad] =
 [[1325673 -2390482]
  [4940227 5.375431e+07]]
 
-
 ---PORPOISING---
 [[Eigenvalue check result, Est. pitch settling time (s)],
  [Savitsky chart result, Critical trim angle (deg)]] =
 [[0 7.097941]
  [0 9.955598]]
-
 
 ---BEHAVIOR IN WAVES---
 H_sig            1.402 m, significant wave heigth
