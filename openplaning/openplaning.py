@@ -747,7 +747,7 @@ class PlaningBoat():
             # self.get_geo_lengths() #No need to call, because ndmath's nDimNewton allways calls the obj function before calling this "constraint"
             return [-self.L_K]
         
-        xlims = np.array([[-np.Inf, np.Inf], tauLims])
+        xlims = np.array([[-np.inf, np.inf], tauLims])
         warnings.filterwarnings("ignore", category=UserWarning)
         [self.z_wl, self.tau] = ndmath.nDimNewton(_boatForces, x0, _boatForcesPrime, tolF, maxiter, xlims, hehcon=_L_K)/[10, 1]
         warnings.filterwarnings("default", category=UserWarning)
