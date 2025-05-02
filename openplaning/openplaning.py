@@ -633,10 +633,10 @@ class PlaningBoat():
                 self.air_resistance = np.array([0, 0, 0])
                 return
 
-            #Vertical distance from calm water line to keel at LOA
+            #Vertical distance from running calm water line to keel at l_air
             a_dist = np.sin(pi/180*(tau + eta_5))*(l_air-L_K)
             
-            #Vertical distance from keel to horizontal line level with boat's height
+            #Vertical distance from keel at l_air to horizontal line level with h_air
             b_dist = np.cos(pi/180*(tau + eta_5))*h_air
             
             #Vertical distance from CG to center of square (moment arm, positive is CG above)
