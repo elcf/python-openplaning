@@ -197,9 +197,10 @@ Contributions and feedback are welcome and greatly appreciated. Feel free to ope
 
 ## Citing
 This package was presented as a conference paper at the SNAME FAST Conference 2021:
-* Castro-Feliciano, E. L., 2021, "OpenPlaning: Open-Source Framework for the Hydrodynamic Design of Planing Hulls," SNAME FAST '21 Conference Proceedings
+* Castro-Feliciano, E. L., 2021, "OpenPlaning: Open-Source Framework for the Hydrodynamic Design of Planing Hulls," SNAME International Conference on Fast Sea Transportation, Providence, RI
 
 ## References
+* Castro-Feliciano, E. L., Mesa, J., and Daidola J. C., 2024, "Planing Boat Hull Roughness and Its Influence on Performance, Fleet Economics, and Environmental Impact," SNAME Chesapeake Power Boat Symposium, Norfolk, VA
 * Castro-Feliciano, E. L., Sun, J., and Troesch, A. W., 2017, "First Step Toward the Codesign of Planing Craft and Active Control Systems," J. Offshore Mech. Arct. Eng., 139(1)
 * Faltinsen, O. M., 2005, "Planing Vessels," Hydrodynamics of High-Speed Marine Vehicles, Cambridge University Press, New York, p. 342
 * Fridsma, G., 1971, "A Systematic Study of the Rough-Water Performance of Planing Boats (Irregular Waves - Part II)," Tech. Rep. 1495, Stevens Institute of Technology
