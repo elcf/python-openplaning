@@ -540,7 +540,10 @@ class PlaningBoat():
 
             #Total surface area
             S = S1 + S2 
-            if S == 0: 
+            if S == 0:
+                V_m = 0
+                C_f = 0
+                deltaC_f = 0 
                 F_x = 0
                 F_z = 0
                 M_cg = 0
