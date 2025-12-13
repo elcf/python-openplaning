@@ -375,11 +375,11 @@ class PlaningBoat():
             #z_max/Vt coefficient (Eq. 9.10 of Faltinsen 2005 rearranged)
             z_max = 0.5 * b * np.tan(pi/180*beta) / (x_s * (pi/180)*(tau + eta_5)) - 1
 
-            if lambda_C < 0:
+            if lambda_C < 0: #Need to carry over L_C<0 on above formulas to not change the angles
                 lambda_C = 0
                 L_C = 0
-                x_s = 0
-                warnings.warn('Vessel operating without wetted chines (L_C = 0).', stacklevel=2)
+                x_s = L_K
+                warnings.warn('Vessel operating without wetted chines (L_C = 0). Wetted surfaces calculated using wetted_lengths_type=3 (Savitsky \'76) may be unreliable. Check alpha and z_max (z_max/Ut) values. Consider using wetted_lengths_type=1 or 2.', stacklevel=2)
 
             #Mean wetted length-to-beam ratio, Eq. 15 of Savitsky '76
             lambda_W = (lambda_K + lambda_C)/2+0.03
