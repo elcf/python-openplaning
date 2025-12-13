@@ -1,6 +1,7 @@
 # OpenPlaning
 
 [![Documentation Status](https://readthedocs.org/projects/openplaning/badge/?version=latest)](https://openplaning.readthedocs.io/en/latest/?badge=latest)
+[![PyPI version](https://img.shields.io/pypi/v/openplaning.svg)](https://pypi.org/project/openplaning/)
 
 OpenPlaning is a Python library for the hydrodynamic evaluation of planing hulls based on the Savitsky empirical methods.
 
@@ -182,6 +183,15 @@ R_AW             38406.03 N, added resistance in waves
 Average impact acceleration [n_cg, n_bow] (g's) =
 [0.3082269 0.754686]
 ```
+
+## Releases and Source Archives
+
+Packaged source distributions (sdist) and wheels for each version are published on PyPI:
+- https://pypi.org/project/openplaning/
+
+If you want the exact source that was uploaded for a given version, download the Source Distribution (`.tar.gz`) from PyPI.
+
+Starting with version **0.4.8**, Git tags (`vX.Y.Z`) correspond to PyPI releases.
 
 ## Dependencies
 
