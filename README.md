@@ -179,7 +179,7 @@ Restoring matrix, [N/m, N/rad; N, N*m/rad] =
 
 ---BEHAVIOR IN WAVES---
 H_sig            1.402 m, significant wave heigth
-R_AW             38406.03 N, added resistance in waves
+R_AW             29716.1 N, added resistance in waves
 Average impact acceleration [n_cg, n_bow] (g's) =
 [0.3082269 0.754686]
 ```
