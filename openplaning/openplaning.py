@@ -1024,7 +1024,7 @@ class PlaningBoat():
             if P6 < 2 or P6 > 6:
                 warnings.warn('Speed coefficient = {0:.3f}, outside of range of applicability (2 <= Vk/sqrt(L) <= 6, with units knots/ft^0.5). Results are extrapolations.'.format(P6), stacklevel=2)
                 
-            R_AW_2 = (w*b**3)*66*10**-6*(H_sig/b+0.5)*(L/b)**3/C_Delta+0.0043*(tau-4) #Added resistance at Vk/sqrt(L) = 2
+            R_AW_2 = (w*b**3)*(66*10**-6*(H_sig/b+0.5)*(L/b)**3/C_Delta+0.0043*(tau-4)) #Added resistance at Vk/sqrt(L) = 2
             R_AW_4 = (Delta)*(0.3*H_sig/b)/(1+2*H_sig/b)*(1.76-tau/6-2*np.tan(beta*pi/180)**3) #Vk/sqrt(L) = 4
             R_AW_6 = (w*b**3)*(0.158*H_sig/b)/(1+(H_sig/b)*(0.12*beta-21*C_Delta*(5.6-L/b)+7.5*(6-L/b))) #Vk/sqrt(L) = 6
             R_AWs = np.array([R_AW_2, R_AW_4, R_AW_6])
