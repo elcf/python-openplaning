@@ -22,7 +22,7 @@ copyright = '2024, Esteban L. Castro-Feliciano'
 author = 'Esteban L. Castro-Feliciano'
 
 # The full version, including alpha/beta/rc tags
-release = '0.4.8'
+release = '0.4.9'
 
 
 # -- General configuration ---------------------------------------------------
